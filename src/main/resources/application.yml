@@ -12,7 +12,6 @@ spring:
         registration:
           kakao:
             client-id: 7845a080f472eabd0d3ca3a3152d1962 # 카카오 개발자 센터에서 발급받은 Client ID
-            client-secret: Ikxwh6d7izUjfvj0dkoHlZ79micEDiKT # 카카오 개발자 센터에서 발급받은 Client Secret
             redirect-uri: "http://localhost:8888/returnPage.jsp"
             authorization-grant-type: authorization_code
             scope: profile_nickname
