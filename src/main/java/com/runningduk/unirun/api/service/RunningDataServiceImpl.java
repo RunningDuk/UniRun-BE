@@ -44,7 +44,7 @@ public class RunningDataServiceImpl implements RunningDataService {
         }
     }
 
-    public List<RunningData> getRunningByUserId(String userId) {
+    public List<RunningData> getRunningDataListByUserId(String userId) {
         return runningDataRepository.findByUserId(userId);
     }
 
@@ -107,6 +107,15 @@ public class RunningDataServiceImpl implements RunningDataService {
             return 11.0; // 러닝 (11.2 km/h)
         } else {
             return 11.5; // 러닝 (빠른 속도)
+        }
+    }
+
+    public void deleteRunningDataById(int runningDataId) throws NoSuchRunningDataException {
+        Optional<RunningData> result = runningDataRepository.findById(runningDataId);
+        if (result.isPresent()) {
+            runningDataRepository.deleteById(runningDataId);
+        } else {
+            throw new NoSuchRunningDataException("Running data not found for id " + runningDataId);
         }
     }
 }
