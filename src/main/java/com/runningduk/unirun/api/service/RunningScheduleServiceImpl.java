@@ -16,4 +16,8 @@ public class RunningScheduleServiceImpl implements RunningScheduleService {
     public List<RunningSchedule> getRunningScheduleListByUserId(String userId) {
         return runningScheduleRepository.findByUserId(userId);
     }
+
+    public List<RunningSchedule> getRunningScheduleList() {
+        return runningScheduleRepository.findAll();
+    }
 }

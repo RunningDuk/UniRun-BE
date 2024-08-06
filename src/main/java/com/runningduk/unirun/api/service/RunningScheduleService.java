@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface RunningScheduleService {
     public List<RunningSchedule> getRunningScheduleListByUserId(String userId);
+
+    public List<RunningSchedule> getRunningScheduleList();
 }

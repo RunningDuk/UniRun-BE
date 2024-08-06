@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.sql.Time;
 
 @Entity
 @Table(name="running_schedule")
@@ -30,10 +31,10 @@ public class RunningSchedule {
     private Date runningDate;
 
     @Column(name="start_time")
-    private String startTime;
+    private Time startTime;
 
     @Column(name="end_time")
-    private String endTime;
+    private Time endTime;
 
     @Column(name="type")
     private String type;
