@@ -10,7 +10,6 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.SpringApplication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -55,13 +54,27 @@ public class CalendarController {
     }
 
     @GetMapping("/running-schedule/{runningScheduleId}")
-    public ResponseEntity<Map<String, Object>> getRunningSchedule(@PathVariable int runningScheduleId) {
+    public ResponseEntity<Map<String, Object>> getRunningSchedule(@PathVariable int runningScheduleId, HttpSession session) {
         try {
             result = new HashMap<>();
 
             RunningSchedule runningSchedule = runningScheduleService.getRunningScheduleById(runningScheduleId);
 
+            int daysUntilRunning = runningScheduleService.checkDaysLeft(runningSchedule.getRunningDate());
+
+            String userId = (String) session.getAttribute("userId");
+
+            if (userId == null) {
+                result.put("error", "Login is required.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
+            }
+            boolean isParticipant = (runningScheduleService.isUserCreater(runningSchedule, userId) || attendanceService.isUserParticipant(runningScheduleId, userId));
+
+            System.out.println(isParticipant);
+
             result.put("runningSchedule", runningSchedule);
+            result.put("daysUntilRunning", daysUntilRunning);
+            result.put("participant", isParticipant);
 
             return ResponseEntity.ok(result);
         } catch (NoSuchRunningScheduleException e) {

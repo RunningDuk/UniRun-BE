@@ -24,4 +24,8 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         return runningScheduleList;
     }
+
+    public boolean isUserParticipant(int runningScheduleId, String userId) {
+        return attendanceRepository.existsByRunningScheduleIdAndUserId(runningScheduleId, userId);
+    }
 }

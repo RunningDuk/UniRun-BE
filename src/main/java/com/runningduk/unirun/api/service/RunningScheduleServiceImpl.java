@@ -7,6 +7,10 @@ import com.runningduk.unirun.exceptions.NoSuchRunningScheduleException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,5 +35,17 @@ public class RunningScheduleServiceImpl implements RunningScheduleService {
         } else {
             throw new NoSuchRunningScheduleException(runningScheduleId);
         }
+    }
+
+    public int checkDaysLeft(Date runningDate) {
+        LocalDate eventDate = runningDate.toLocalDate();
+        LocalDate today = LocalDate.now(ZoneId.systemDefault());    // 오늘 날짜 가져오기
+
+        // 오늘부터 이벤트 날짜까지 남은 일수 계산
+        return (int) ChronoUnit.DAYS.between(today, eventDate);
+    }
+
+    public boolean isUserCreater(RunningSchedule runningSchedule, String userId) {
+        return (runningSchedule.getUserId().equals(userId));
     }
 }

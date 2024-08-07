@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface AttendanceService {
     public List<RunningSchedule> getRunningScheduleListByUserId(String userId);
+
+    boolean isUserParticipant(int runningScheduleId, String userId);
 }
