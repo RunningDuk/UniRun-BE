@@ -21,8 +21,8 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/calendar")
-public class CalendarController {
+@RequestMapping
+public class RunningScheduleController {
     private final RunningScheduleService runningScheduleService;
     private final AttendanceService attendanceService;
 
