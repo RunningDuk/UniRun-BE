@@ -1,6 +1,7 @@
 package com.runningduk.unirun.api.service;
 
 import com.runningduk.unirun.api.controller.RunningTypeController;
+import com.runningduk.unirun.common.DateUtils;
 import com.runningduk.unirun.domain.entity.RunningSchedule;
 import com.runningduk.unirun.domain.repository.RunningScheduleRepository;
 import com.runningduk.unirun.exceptions.NoSuchRunningScheduleException;
@@ -11,8 +12,10 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +23,11 @@ public class RunningScheduleServiceImpl implements RunningScheduleService {
     private final RunningScheduleRepository runningScheduleRepository;
 
     public List<RunningSchedule> getRunningScheduleListByUserId(String userId) {
-        return runningScheduleRepository.findByUserId(userId);
+        List<RunningSchedule> runningScheduleList = runningScheduleRepository.findByUserId(userId);
+        LocalDate today = LocalDate.now();
+        return runningScheduleList.stream()
+                .filter(schedule -> !DateUtils.convertToLocalDate(schedule.getRunningDate()).isBefore(today))
+                .collect(Collectors.toList());
     }
 
     public List<RunningSchedule> getRunningScheduleList() {

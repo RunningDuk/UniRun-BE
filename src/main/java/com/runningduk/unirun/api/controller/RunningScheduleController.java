@@ -109,10 +109,12 @@ public class RunningScheduleController {
             List<RunningSchedule> userCreatedSchedules = runningScheduleService.getRunningScheduleListByUserId(userId);
 
             for (RunningSchedule runningSchedule : userCreatedSchedules) {
+                int daysUtilRunningDate = runningScheduleService.checkDaysLeft(runningSchedule.getRunningDate());
                 MyRunningSchedulesGetRes res = MyRunningSchedulesGetRes.builder()
                                 .runningSchedule(runningSchedule)
                                 .isCreater(true)
                                 .isParticipant(false)
+                                .daysUntilRunningDate(daysUtilRunningDate)
                                 .build();
                 resList.add(res);
             }
@@ -120,10 +122,12 @@ public class RunningScheduleController {
             List<RunningSchedule> attendedSchedule = attendanceService.getRunningScheduleListByUserId(userId);
 
             for (RunningSchedule runningSchedule : attendedSchedule) {
+                int daysUtilRunningDate = runningScheduleService.checkDaysLeft(runningSchedule.getRunningDate());
                 MyRunningSchedulesGetRes res = MyRunningSchedulesGetRes.builder()
                         .runningSchedule(runningSchedule)
                         .isCreater(false)
                         .isParticipant(true)
+                        .daysUntilRunningDate(daysUtilRunningDate)
                         .build();
                 resList.add(res);
             }

@@ -11,4 +11,5 @@ public class MyRunningSchedulesGetRes {
     private final RunningSchedule runningSchedule;
     private final boolean isCreater;
     private final boolean isParticipant;
+    private final int daysUntilRunningDate;
 }
