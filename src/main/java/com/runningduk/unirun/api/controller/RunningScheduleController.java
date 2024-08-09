@@ -53,45 +53,6 @@ public class RunningScheduleController {
         }
     }
 
-    @GetMapping("/running-schedule/{runningScheduleId}")
-    public ResponseEntity<Map<String, Object>> getRunningSchedule(@PathVariable int runningScheduleId, HttpSession session) {
-        try {
-            result = new HashMap<>();
-
-            RunningSchedule runningSchedule = runningScheduleService.getRunningScheduleById(runningScheduleId);
-
-            int daysUntilRunning = runningScheduleService.checkDaysLeft(runningSchedule.getRunningDate());
-
-            String userId = (String) session.getAttribute("userId");
-
-            if (userId == null) {
-                result.put("error", "Login is required.");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
-            }
-            boolean isParticipant = (runningScheduleService.isUserCreater(runningSchedule, userId) || attendanceService.isUserParticipant(runningScheduleId, userId));
-
-            System.out.println(isParticipant);
-
-            result.put("runningSchedule", runningSchedule);
-            result.put("daysUntilRunning", daysUntilRunning);
-            result.put("participant", isParticipant);
-
-            return ResponseEntity.ok(result);
-        } catch (NoSuchRunningScheduleException e) {
-            log.error("Failed to fetch running schedule for running_schedule_id " + runningScheduleId, e);
-
-            result.put("error", e.getMessage());
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-        } catch (Exception e) {
-            log.error("Failed to fetch running schedule for running_schedule_id " + runningScheduleId, e);
-
-            result.put("error", "An internal server error occurred. Please try again later.");
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
-        }
-    }
-
     @GetMapping("/my-running-schedules")
     public ResponseEntity<Map<String, Object>> getMyRunningSchedules(HttpSession session) {
         try {
