@@ -30,29 +30,6 @@ public class RunningScheduleController {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @GetMapping("/running-schedules")
-    public ResponseEntity<Map<String, Object>> getRunningSchedules() {
-        try {
-            result = new HashMap<>();
-
-            List<RunningSchedule> runningScheduleList = runningScheduleService.getRunningScheduleList();
-            List<RunningSchedulesGetRes> resList = new ArrayList<>();
-            for (RunningSchedule runningSchedule : runningScheduleList) {
-                resList.add(new RunningSchedulesGetRes(runningSchedule));
-            }
-
-            result.put("runningScheduleList", resList);
-
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            log.error("Failed to fetch running schedules", e);
-
-            result.put("error", "러닝 타입 조회에 실패하였습니다.");
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
-        }
-    }
-
     @GetMapping("/my-running-schedules")
     public ResponseEntity<Map<String, Object>> getMyRunningSchedules(HttpSession session) {
         try {
