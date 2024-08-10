@@ -15,4 +15,6 @@ public interface RunningScheduleRepository extends JpaRepository<RunningSchedule
 
     @Query("SELECT DISTINCT rs.runningDate FROM RunningSchedule rs WHERE rs.runningDate BETWEEN :startDate AND :endDate ORDER BY rs.runningDate")
     public List<Date> findDistinctRunningDatesByMonth(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
+    public List<RunningSchedule> findRunningScheduleByRunningDate(Date date);
 }

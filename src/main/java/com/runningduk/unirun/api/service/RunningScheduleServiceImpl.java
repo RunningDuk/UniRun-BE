@@ -69,4 +69,14 @@ public class RunningScheduleServiceImpl implements RunningScheduleService {
 
         return runningScheduleRepository.findDistinctRunningDatesByMonth(firstDateParam, lastDateParam);
     }
+
+    public List<RunningSchedule> getRunningScheduleByDate(int year, int month, int day) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String dateStr = year + "-" + String.format("%02d", month) + "-" + String.format("%02d", day);
+
+        LocalDate date = LocalDate.parse(dateStr, formatter);
+        Date dateParam = java.sql.Date.valueOf(date);
+
+        return runningScheduleRepository.findRunningScheduleByRunningDate(dateParam);
+    }
 }

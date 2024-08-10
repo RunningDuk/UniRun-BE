@@ -18,4 +18,6 @@ public interface RunningScheduleService {
     boolean isUserCreater(RunningSchedule runningSchedule, String userId);
 
     List<Date> getRunningScheduleMonthly(int year, int month);
+
+    List<RunningSchedule> getRunningScheduleByDate(int year, int month, int day);
 }

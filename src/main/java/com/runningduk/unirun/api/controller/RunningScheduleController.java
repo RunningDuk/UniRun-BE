@@ -45,6 +45,28 @@ public class RunningScheduleController {
         }
     }
 
+    @GetMapping("/running-schedules/daily")
+    public ResponseEntity<Map<String, Object>> handleGetRunningSchedulesDaily(
+            @RequestParam(name="year") int year,
+            @RequestParam(name="month") int month,
+            @RequestParam(name="day") int day) {
+        try {
+            result = new HashMap<>();
+
+            List<RunningSchedule> runningScheduleList = runningScheduleService.getRunningScheduleByDate(year, month, day);
+
+            result.put("runningSchedules", runningScheduleList);
+
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Failed to fetch daily running schedules.", e);
+
+            result.put("error", "An internal server error occurred. Please try again later.");
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+        }
+    }
+
     @GetMapping("/my-running-schedules")
     public ResponseEntity<Map<String, Object>> getMyRunningSchedules(HttpSession session) {
         try {
