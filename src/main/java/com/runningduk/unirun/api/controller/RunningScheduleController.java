@@ -4,6 +4,7 @@ import com.runningduk.unirun.api.response.MyRunningSchedulesGetRes;
 import com.runningduk.unirun.api.service.AttendanceService;
 import com.runningduk.unirun.api.service.RunningScheduleService;
 import com.runningduk.unirun.domain.entity.RunningSchedule;
+import com.runningduk.unirun.exceptions.NoSuchRunningScheduleException;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -112,6 +113,43 @@ public class RunningScheduleController {
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error("Failed to fetch my running schedule.", e);
+
+            result.put("error", "An internal server error occurred. Please try again later.");
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+        }
+    }
+
+    @DeleteMapping("/running-schedule/{runningScheduleId}")
+    public ResponseEntity<Map<String, Object>> handleDeleteRunningSchedule(@PathVariable(name="runningScheduleId") int runningScheduleId, HttpSession httpSession) {
+        try {
+            result = new HashMap<>();
+
+            String userId = (String) httpSession.getAttribute("userId");
+            if (userId == null) {
+                result.put("error", "Login is required.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
+            }
+
+            RunningSchedule runningSchedule = runningScheduleService.getRunningScheduleById(runningScheduleId);
+            if (!runningSchedule.getUserId().equals(userId)) {
+                result.put("error", "You do not have permission to delete this running schedule.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(result);
+            }
+
+            runningScheduleService.deleteRunningSchedule(runningScheduleId);
+
+            result.put("message", "러닝 일정 삭제에 성공했습니다.");
+
+            return ResponseEntity.ok(result);
+        } catch (NoSuchRunningScheduleException e) {
+            log.error("Failed to delete running schedule for running_schedule_id " + runningScheduleId, e);
+
+            result.put("error", e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        } catch (Exception e) {
+            log.error("Failed to delete running schedule for running_schedule_id " + runningScheduleId, e);
 
             result.put("error", "An internal server error occurred. Please try again later.");
 

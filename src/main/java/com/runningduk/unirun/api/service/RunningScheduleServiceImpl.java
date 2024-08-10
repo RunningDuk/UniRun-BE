@@ -79,4 +79,14 @@ public class RunningScheduleServiceImpl implements RunningScheduleService {
 
         return runningScheduleRepository.findRunningScheduleByRunningDate(dateParam);
     }
+
+    public void deleteRunningSchedule(int runningScheduleId) throws NoSuchRunningScheduleException {
+        Optional<RunningSchedule> result = runningScheduleRepository.findById(runningScheduleId);
+
+        if (!result.isPresent()) {
+            throw new NoSuchRunningScheduleException(runningScheduleId);
+        }
+
+        runningScheduleRepository.deleteById(runningScheduleId);
+    }
 }
