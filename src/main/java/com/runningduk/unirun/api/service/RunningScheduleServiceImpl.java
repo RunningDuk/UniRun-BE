@@ -1,6 +1,5 @@
 package com.runningduk.unirun.api.service;
 
-import com.runningduk.unirun.api.controller.RunningTypeController;
 import com.runningduk.unirun.common.DateUtils;
 import com.runningduk.unirun.domain.entity.RunningSchedule;
 import com.runningduk.unirun.domain.repository.RunningScheduleRepository;
@@ -11,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
@@ -54,5 +54,19 @@ public class RunningScheduleServiceImpl implements RunningScheduleService {
 
     public boolean isUserCreater(RunningSchedule runningSchedule, String userId) {
         return (runningSchedule.getUserId().equals(userId));
+    }
+
+    public List<Date> getRunningScheduleMonthly(int year, int month) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String dateStr = year + "-" + String.format("%02d", month) + "-" + "01";
+
+        LocalDate date = LocalDate.parse(dateStr, formatter);
+        LocalDate firstDateOfMonth = date.withDayOfMonth(1);
+        LocalDate lastDateOfMonth = date.withDayOfMonth(date.lengthOfMonth());
+
+        Date firstDateParam = java.sql.Date.valueOf(firstDateOfMonth);
+        Date lastDateParam = java.sql.Date.valueOf(lastDateOfMonth);
+
+        return runningScheduleRepository.findDistinctRunningDatesByMonth(firstDateParam, lastDateParam);
     }
 }

@@ -1,11 +1,9 @@
 package com.runningduk.unirun.api.controller;
 
 import com.runningduk.unirun.api.response.MyRunningSchedulesGetRes;
-import com.runningduk.unirun.api.response.RunningSchedulesGetRes;
 import com.runningduk.unirun.api.service.AttendanceService;
 import com.runningduk.unirun.api.service.RunningScheduleService;
 import com.runningduk.unirun.domain.entity.RunningSchedule;
-import com.runningduk.unirun.exceptions.NoSuchRunningScheduleException;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -14,10 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.Date;
+import java.util.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -29,6 +25,25 @@ public class RunningScheduleController {
     HashMap<String, Object> result;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
+
+    @GetMapping("/running-schedules/monthly")
+    public ResponseEntity<Map<String, Object>> handleGetRunningSchedulesMonthly(@RequestParam(name="year") int year, @RequestParam(name="month") int month) {
+        try {
+            result = new HashMap<>();
+
+            List<Date> runningDateList = runningScheduleService.getRunningScheduleMonthly(year, month);
+
+            result.put("runningDates", runningDateList);
+
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Failed to fetch monthly running schedules.", e);
+
+            result.put("error", "An internal server error occurred. Please try again later.");
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+        }
+    }
 
     @GetMapping("/my-running-schedules")
     public ResponseEntity<Map<String, Object>> getMyRunningSchedules(HttpSession session) {

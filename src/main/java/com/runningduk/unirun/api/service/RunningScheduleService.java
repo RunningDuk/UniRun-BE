@@ -16,4 +16,6 @@ public interface RunningScheduleService {
     int checkDaysLeft(Date runningDate);
 
     boolean isUserCreater(RunningSchedule runningSchedule, String userId);
+
+    List<Date> getRunningScheduleMonthly(int year, int month);
 }
