@@ -4,6 +4,7 @@ import com.runningduk.unirun.api.response.MyRunningSchedulesGetRes;
 import com.runningduk.unirun.api.service.AttendanceService;
 import com.runningduk.unirun.api.service.RunningScheduleService;
 import com.runningduk.unirun.domain.entity.RunningSchedule;
+import com.runningduk.unirun.exceptions.DuplicateAttendingException;
 import com.runningduk.unirun.exceptions.NoSuchRunningScheduleException;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -144,6 +145,43 @@ public class RunningScheduleController {
             return ResponseEntity.ok(result);
         } catch (NoSuchRunningScheduleException e) {
             log.error("Failed to delete running schedule for running_schedule_id " + runningScheduleId, e);
+
+            result.put("error", e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        } catch (Exception e) {
+            log.error("Failed to delete running schedule for running_schedule_id " + runningScheduleId, e);
+
+            result.put("error", "An internal server error occurred. Please try again later.");
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+        }
+    }
+
+    @PostMapping("/running-schedule/{runningScheduleId}/attend")
+    public ResponseEntity<Map<String, Object>> handleAttendRunningSchedule(@PathVariable(name="runningScheduleId") int runningScheduleId, HttpSession httpSession) {
+        try {
+            result = new HashMap<>();
+
+            String userId = (String) httpSession.getAttribute("userId");
+            if (userId == null) {
+                result.put("error", "Login is required.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
+            }
+
+            attendanceService.attendRunningSchedule(runningScheduleId, userId);
+
+            result.put("message", "러닝 스케줄 참석에 성공하였습니다.");
+
+            return ResponseEntity.ok(result);
+        } catch (NoSuchRunningScheduleException e) {
+            log.error("Failed to attend running schedule for running_schedule_id " + runningScheduleId, e);
+
+            result.put("error", e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        } catch (DuplicateAttendingException e) {
+            log.error("Failed to attend running schedule for running_schedule_id " + runningScheduleId, e);
 
             result.put("error", e.getMessage());
 
