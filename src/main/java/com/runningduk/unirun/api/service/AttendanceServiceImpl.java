@@ -4,8 +4,10 @@ import com.runningduk.unirun.common.DateUtils;
 import com.runningduk.unirun.domain.entity.Attendance;
 import com.runningduk.unirun.domain.entity.RunningSchedule;
 import com.runningduk.unirun.domain.repository.AttendanceRepository;
+import com.runningduk.unirun.exceptions.CreatorCannotCancelException;
 import com.runningduk.unirun.exceptions.DuplicateAttendingException;
 import com.runningduk.unirun.exceptions.NoSuchRunningScheduleException;
+import com.runningduk.unirun.exceptions.NotParticipatingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,5 +57,18 @@ public class AttendanceServiceImpl implements AttendanceService {
         System.out.println("attendance service - new attendance : " + newAttendance);
 
         attendanceRepository.save(newAttendance);
+    }
+
+    public void unattendRunningSchedule(int runningScheduleId, String userId)
+            throws NoSuchRunningScheduleException, CreatorCannotCancelException, NotParticipatingException {
+        RunningSchedule runningSchedule = runningScheduleService.getRunningScheduleById(runningScheduleId);
+
+        if (runningSchedule.getUserId().equals(userId)) {
+            throw new CreatorCannotCancelException();
+        } else if (!attendanceRepository.existsByRunningScheduleIdAndUserId(runningScheduleId, userId)) {
+            throw new NotParticipatingException(String.valueOf(runningScheduleId));
+        }
+
+        attendanceRepository.deleteByRunningScheduleIdAndUserId(runningScheduleId, userId);
     }
 }

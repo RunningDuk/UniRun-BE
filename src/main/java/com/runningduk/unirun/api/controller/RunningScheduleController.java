@@ -4,8 +4,10 @@ import com.runningduk.unirun.api.response.MyRunningSchedulesGetRes;
 import com.runningduk.unirun.api.service.AttendanceService;
 import com.runningduk.unirun.api.service.RunningScheduleService;
 import com.runningduk.unirun.domain.entity.RunningSchedule;
+import com.runningduk.unirun.exceptions.CreatorCannotCancelException;
 import com.runningduk.unirun.exceptions.DuplicateAttendingException;
 import com.runningduk.unirun.exceptions.NoSuchRunningScheduleException;
+import com.runningduk.unirun.exceptions.NotParticipatingException;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -188,6 +190,49 @@ public class RunningScheduleController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
         } catch (Exception e) {
             log.error("Failed to delete running schedule for running_schedule_id " + runningScheduleId, e);
+
+            result.put("error", "An internal server error occurred. Please try again later.");
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+        }
+    }
+
+    @PostMapping("/running-schedule/{runningScheduleId}/unattend")
+    public ResponseEntity<Map<String, Object>> handleUnattendRunningSchedule(@PathVariable(name="runningScheduleId") int runningScheduleId, HttpSession httpSession) {
+        try {
+            result = new HashMap<>();
+
+            String userId = (String) httpSession.getAttribute("userId");
+            if (userId == null) {
+                result.put("error", "Login is required.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
+            }
+
+            attendanceService.unattendRunningSchedule(runningScheduleId, userId);
+
+            result.put("message", "러닝 취소에 성공하였습니다.");
+
+            return ResponseEntity.ok(result);
+        } catch (NoSuchRunningScheduleException e) {
+            log.error("Failed to unattend running schedule for running_schedule_id " + runningScheduleId, e);
+
+            result.put("error", e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
+        } catch (CreatorCannotCancelException e) {
+            log.error("Creator attempted to cancel their own schedule participation for running_schedule_id " + runningScheduleId, e);
+
+            result.put("error", e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(result);
+        } catch (NotParticipatingException e) {
+            log.error("Attempted to cancel participation for a schedule the user is not participating in for running_schedule_id " + runningScheduleId, e);
+
+            result.put("error", e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        } catch (Exception e) {
+            log.error("Failed to unattend running schedule for running_schedule_id " + runningScheduleId, e);
 
             result.put("error", "An internal server error occurred. Please try again later.");
 
