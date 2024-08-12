@@ -150,7 +150,7 @@ public class RunningScheduleController {
 
             result.put("error", e.getMessage());
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
         } catch (Exception e) {
             log.error("Failed to delete running schedule for running_schedule_id " + runningScheduleId, e);
 
@@ -181,15 +181,15 @@ public class RunningScheduleController {
 
             result.put("error", e.getMessage());
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
         } catch (DuplicateAttendingException e) {
             log.error("Failed to attend running schedule for running_schedule_id " + runningScheduleId, e);
 
             result.put("error", e.getMessage());
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(result);
         } catch (Exception e) {
-            log.error("Failed to delete running schedule for running_schedule_id " + runningScheduleId, e);
+            log.error("Failed to attend running schedule for running_schedule_id " + runningScheduleId, e);
 
             result.put("error", "An internal server error occurred. Please try again later.");
 
@@ -197,7 +197,7 @@ public class RunningScheduleController {
         }
     }
 
-    @PostMapping("/running-schedule/{runningScheduleId}/unattend")
+    @DeleteMapping("/running-schedule/{runningScheduleId}/unattend")
     public ResponseEntity<Map<String, Object>> handleUnattendRunningSchedule(@PathVariable(name="runningScheduleId") int runningScheduleId, HttpSession httpSession) {
         try {
             result = new HashMap<>();
