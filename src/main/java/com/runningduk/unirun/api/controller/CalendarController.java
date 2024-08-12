@@ -21,8 +21,8 @@ import java.util.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping
-public class RunningScheduleController {
+@RequestMapping("/calendar")
+public class CalendarController {
     private final RunningScheduleService runningScheduleService;
     private final AttendanceService attendanceService;
 
@@ -173,7 +173,7 @@ public class RunningScheduleController {
 
             attendanceService.attendRunningSchedule(runningScheduleId, userId);
 
-            result.put("message", "러닝 스케줄 참석에 성공하였습니다.");
+            result.put("message", "러닝 스케줄 참여에 성공하였습니다.");
 
             return ResponseEntity.ok(result);
         } catch (NoSuchRunningScheduleException e) {
@@ -210,7 +210,7 @@ public class RunningScheduleController {
 
             attendanceService.unattendRunningSchedule(runningScheduleId, userId);
 
-            result.put("message", "러닝 취소에 성공하였습니다.");
+            result.put("message", "러닝 스케줄 참여 취소에 성공하였습니다.");
 
             return ResponseEntity.ok(result);
         } catch (NoSuchRunningScheduleException e) {
