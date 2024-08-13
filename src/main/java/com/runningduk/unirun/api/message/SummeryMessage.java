@@ -10,9 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SummeryMessage {
-    private String date;
-    private String dayOfWeek;
-    private String time;
     private double distance;
     private double cal;
     private int runningDataId;
