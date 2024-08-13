@@ -1,10 +1,7 @@
 package com.runningduk.unirun.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.sql.Date;
 import java.sql.Time;
@@ -12,6 +9,7 @@ import java.sql.Time;
 @Entity
 @Table(name="running_schedule")
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

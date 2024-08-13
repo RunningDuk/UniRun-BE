@@ -1,5 +1,6 @@
 package com.runningduk.unirun.api.controller;
 
+import com.runningduk.unirun.api.request.RunningSchedulePostReq;
 import com.runningduk.unirun.api.response.MyRunningSchedulesGetRes;
 import com.runningduk.unirun.api.service.AttendanceService;
 import com.runningduk.unirun.api.service.RunningScheduleService;
@@ -9,15 +10,19 @@ import com.runningduk.unirun.exceptions.DuplicateAttendingException;
 import com.runningduk.unirun.exceptions.NoSuchRunningScheduleException;
 import com.runningduk.unirun.exceptions.NotParticipatingException;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -233,6 +238,54 @@ public class CalendarController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
         } catch (Exception e) {
             log.error("Failed to unattend running schedule for running_schedule_id " + runningScheduleId, e);
+
+            result.put("error", "An internal server error occurred. Please try again later.");
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+        }
+    }
+
+    @PostMapping("/running-schedule")
+    public ResponseEntity<Map<String, Object>> handlePostRunningSchedule(@Valid @RequestBody RunningSchedulePostReq req, BindingResult bindingResult, HttpSession httpSession) {
+        try {
+            result = new HashMap<>();
+
+            String userId = (String) httpSession.getAttribute("userId");
+            if (userId == null) {
+                result.put("error", "Login is required.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
+            }
+
+            System.out.println("Calendar Controller req: " + req);
+
+            if (bindingResult.hasErrors()) {
+                log.error("Failed to post running schedule");
+
+                List<String> errorMessages = bindingResult.getFieldErrors().stream()
+                        .map(FieldError::getDefaultMessage)
+                        .collect(Collectors.toList());
+
+                result.put("errors", errorMessages);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+            }
+
+            req.validateDateAndTime();
+
+            RunningSchedule runningSchedule = req.toEntity();
+            runningSchedule.setUserId(userId);
+            runningScheduleService.addRunningSchedule(runningSchedule);
+
+            result.put("message", "러닝 스케줄 저장에 성공하였습니다.");
+
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            log.error("Failed to post running schedule", e);
+
+            result.put("error", e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        } catch (Exception e) {
+            log.error("Failed to post running schedule", e);
 
             result.put("error", "An internal server error occurred. Please try again later.");
 

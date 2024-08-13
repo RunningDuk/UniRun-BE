@@ -22,4 +22,6 @@ public interface RunningScheduleService {
     List<RunningSchedule> getRunningScheduleByDate(int year, int month, int day);
 
     void deleteRunningSchedule(int runningScheduleId) throws NoSuchRunningScheduleException;
+
+    void addRunningSchedule(RunningSchedule runningSchedule);
 }

@@ -89,4 +89,8 @@ public class RunningScheduleServiceImpl implements RunningScheduleService {
 
         runningScheduleRepository.deleteById(runningScheduleId);
     }
+
+    public void addRunningSchedule(RunningSchedule runningSchedule) {
+        runningScheduleRepository.save(runningSchedule);
+    }
 }
