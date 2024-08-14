@@ -1,3 +1,14 @@
+jasypt:
+  encryptor:
+    bean: jasyptEncryptor
+    key:
+sever:
+  servlet:
+    session:
+      cookie:
+        #domain: localhost
+        same-site: "none"
+        secure: true
 spring:
   application:
     name: unirun-be
@@ -6,13 +17,33 @@ spring:
     url: jdbc:mariadb://localhost:3306/unirun
     username: root
     password: 0805
+<<<<<<< HEAD
+swagger:
+  title: unirun
+  version: v1.0
+  description: API
+springdoc:
+  api-docs:
+    path: /swagger-ui
+kakao:
+  client-id: 7845a080f472eabd0d3ca3a3152d1962 # 카카오 개발자 센터에서 발급받은 Client ID
+  client-secret: ENC(y8m1EuZACvJkcna210K5dfEBi8lJt2AlM3MMMOqzJtQDHoG2pdzRsav0NkwuU3B/)
+  redirect-uri: "http://localhost:8888/returnPage.jsp"
+  logout-uri: https://kauth.kakao.com/oauth/logout
+  logout-redirect-uri: http://localhost:8888/login.html
+  authorization-grant-type: authorization_code
+  authorization-uri: https://kauth.kakao.com/oauth/authorize
+  token-uri: https://kauth.kakao.com/oauth/token
+  user-info-uri: https://kapi.kakao.com/v2/user/me
+  user-name-attribute: id
+
+=======
   security:
     oauth2:
       client:
         registration:
           kakao:
             client-id: 7845a080f472eabd0d3ca3a3152d1962 # 카카오 개발자 센터에서 발급받은 Client ID
-            client-secret: Ikxwh6d7izUjfvj0dkoHlZ79micEDiKT # 카카오 개발자 센터에서 발급받은 Client Secret
             redirect-uri: "http://localhost:8888/returnPage.jsp"
             authorization-grant-type: authorization_code
             scope: profile_nickname
@@ -23,6 +54,7 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+>>>>>>> 139a981162fb1d5017d2587c516c22b0403627a8
 mybatis:
   mapper-locations: classpath:mapper/**/*.xml
   configuration:
