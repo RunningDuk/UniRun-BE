@@ -18,7 +18,7 @@ public class CommonApiResponse<T> {
     private final T data;
     private final ZonedDateTime sendTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
 
-    public static ResponseEntity<CommonApiResponse> toEntity(final HttpStatus httpStatus) {
-        return ResponseEntity.status(httpStatus).body(null);
+    public ResponseEntity<CommonApiResponse> toEntity(final HttpStatus httpStatus) {
+        return ResponseEntity.status(httpStatus).body(this);
     }
 }
