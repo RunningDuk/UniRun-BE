@@ -1,6 +1,7 @@
 package com.runningduk.unirun.api.controller;
 
 import com.runningduk.unirun.api.request.RunningNamePostReq;
+import com.runningduk.unirun.api.response.CommonApiResponse;
 import com.runningduk.unirun.api.response.RunningTypeGetRes;
 import com.runningduk.unirun.api.service.AttendanceService;
 import com.runningduk.unirun.api.service.RunningDataService;
@@ -25,7 +26,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/running")
 public class RunningTypeController {
-    HashMap<String, Object> result;
+    HttpStatus httpStatus;
 
     private final AttendanceService attendanceService;
     private final RunningDataService runningDataService;
@@ -34,7 +35,7 @@ public class RunningTypeController {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @GetMapping("/types")
-    public ResponseEntity<Map<String, Object>> getTypes(HttpSession httpSession) {
+    public ResponseEntity<CommonApiResponse> getTypes(HttpSession httpSession) {
         String userId = (String) httpSession.getAttribute("userId");
 
         List<RunningSchedule> rsList = new ArrayList<>();
@@ -44,35 +45,39 @@ public class RunningTypeController {
         rsList.addAll(attendedSchedule);
         rsList.addAll(createdSchedules);
 
-        List<RunningTypeGetRes> responseList = new ArrayList<>();
-        responseList.add(new RunningTypeGetRes("직접 입력"));
+        List<RunningTypeGetRes> typeNames = new ArrayList<>();
+        typeNames.add(new RunningTypeGetRes("직접 입력"));
         for (RunningSchedule runningSchedule : rsList) {
-            responseList.add(new RunningTypeGetRes(runningSchedule));
+            typeNames.add(new RunningTypeGetRes(runningSchedule));
 
             log.debug("사용자 RunningSchedule : " + runningSchedule);
         }
 
-        result = new HashMap<>();
-
         try {
-            result.put("typeNames", responseList);
-
             log.info("Successfully fetched running types for user {}", userId);
 
-            return ResponseEntity.ok(result);
+            httpStatus = HttpStatus.OK;
+
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .message("SUCCESS")
+                    .data(typeNames)
+                    .build().toEntity(httpStatus);
         } catch (Exception e) {
             log.error("Failed to fetch running types for user {}", userId, e);
 
-            result.put("error", "러닝 타입 조회에 실패하였습니다.");
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 
-            return ResponseEntity.badRequest().body(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .message("러닝 타입 조회에 실패하였습니다.")
+                    .data(null)
+                    .build().toEntity(httpStatus);
         }
     }
 
     @PatchMapping("/{runningDataId}/name")
-    public ResponseEntity<Map<String, Object>> runningNameAdd(@RequestBody RunningNamePostReq requestDto, @PathVariable int runningDataId) {
-        result = new HashMap<>();
-
+    public ResponseEntity<CommonApiResponse> runningNameAdd(@RequestBody RunningNamePostReq requestDto, @PathVariable int runningDataId) {
         try {
             String newName = requestDto.getRunningName();
 
@@ -81,17 +86,25 @@ public class RunningTypeController {
 
             runningDataService.saveRunningData(runningData);
 
-            result.put("msg", "러닝 이름 저장에 성공하였습니다.");
-
             log.info("Successfully updated running name for runningDataId {}", runningDataId);
 
-            return ResponseEntity.ok(result);
+            httpStatus = HttpStatus.OK;
+
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message("SUCCESS")
+                    .build().toEntity(httpStatus);
         } catch (NoSuchRunningDataException e) {
             log.error("Failed to update running name for runningDataId {}", runningDataId, e);
 
-            result.put("error", "러닝 이름 저장에 실패하였습니다.");
+            httpStatus = HttpStatus.NOT_FOUND;
 
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message("러닝 이름 저장에 실패하였습니다.")
+                    .build().toEntity(httpStatus);
         }
     }
 }
