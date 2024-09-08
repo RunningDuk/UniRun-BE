@@ -1,6 +1,7 @@
 package com.runningduk.unirun.api.controller;
 
 import com.runningduk.unirun.api.request.RunningSchedulePostReq;
+import com.runningduk.unirun.api.response.CommonApiResponse;
 import com.runningduk.unirun.api.response.MyRunningSchedulesGetRes;
 import com.runningduk.unirun.api.service.AttendanceService;
 import com.runningduk.unirun.api.service.RunningScheduleService;
@@ -31,64 +32,79 @@ public class CalendarController {
     private final RunningScheduleService runningScheduleService;
     private final AttendanceService attendanceService;
 
-    HashMap<String, Object> result;
+    HttpStatus httpStatus;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @GetMapping("/running-schedules/monthly")
-    public ResponseEntity<Map<String, Object>> handleGetRunningSchedulesMonthly(@RequestParam(name="year") int year, @RequestParam(name="month") int month) {
+    public ResponseEntity<CommonApiResponse> handleGetRunningSchedulesMonthly(@RequestParam(name="year") int year, @RequestParam(name="month") int month) {
         try {
-            result = new HashMap<>();
-
             List<Date> runningDateList = runningScheduleService.getRunningScheduleMonthly(year, month);
 
-            result.put("runningDates", runningDateList);
+            httpStatus = HttpStatus.OK;
 
-            return ResponseEntity.ok(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(runningDateList)
+                    .message("SUCCESS")
+                    .build().toEntity(httpStatus);
         } catch (Exception e) {
             log.error("Failed to fetch monthly running schedules.", e);
 
-            result.put("error", "An internal server error occurred. Please try again later.");
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message("An internal server error occurred. Please try again later.")
+                    .build().toEntity(httpStatus);
         }
     }
 
     @GetMapping("/running-schedules/daily")
-    public ResponseEntity<Map<String, Object>> handleGetRunningSchedulesDaily(
+    public ResponseEntity<CommonApiResponse> handleGetRunningSchedulesDaily(
             @RequestParam(name="year") int year,
             @RequestParam(name="month") int month,
             @RequestParam(name="day") int day) {
         try {
-            result = new HashMap<>();
-
             List<RunningSchedule> runningScheduleList = runningScheduleService.getRunningScheduleByDate(year, month, day);
 
-            result.put("runningSchedules", runningScheduleList);
+            httpStatus = HttpStatus.OK;
 
-            return ResponseEntity.ok(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .message("SUCCESS")
+                    .data(runningScheduleList)
+                    .build().toEntity(httpStatus);
         } catch (Exception e) {
             log.error("Failed to fetch daily running schedules.", e);
 
-            result.put("error", "An internal server error occurred. Please try again later.");
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message("An internal server error occurred. Please try again later.")
+                    .build().toEntity(httpStatus);
         }
     }
 
     @GetMapping("/my-running-schedules")
-    public ResponseEntity<Map<String, Object>> getMyRunningSchedules(HttpSession session) {
+    public ResponseEntity<CommonApiResponse> getMyRunningSchedules(HttpSession session) {
         try {
-            result = new HashMap<>();
-
             String userId = (String) session.getAttribute("userId");
 
             if (userId == null) {
-                result.put("error", "Login is required.");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
+                httpStatus = HttpStatus.UNAUTHORIZED;
+
+                return CommonApiResponse.builder()
+                        .statusCode(httpStatus.value())
+                        .data(null)
+                        .message("Login is required.")
+                        .build().toEntity(httpStatus);
             }
 
-            List<MyRunningSchedulesGetRes> resList = new ArrayList<>();
+            List<MyRunningSchedulesGetRes> runningScheduleList = new ArrayList<>();
 
             List<RunningSchedule> userCreatedSchedules = runningScheduleService.getRunningScheduleListByUserId(userId);
 
@@ -100,7 +116,7 @@ public class CalendarController {
                                 .isParticipant(false)
                                 .daysUntilRunningDate(daysUtilRunningDate)
                                 .build();
-                resList.add(res);
+                runningScheduleList.add(res);
             }
 
             List<RunningSchedule> attendedSchedule = attendanceService.getRunningScheduleListByUserId(userId);
@@ -113,150 +129,221 @@ public class CalendarController {
                         .isParticipant(true)
                         .daysUntilRunningDate(daysUtilRunningDate)
                         .build();
-                resList.add(res);
+                runningScheduleList.add(res);
             }
 
-            result.put("runningScheduleList", resList);
+            httpStatus = HttpStatus.OK;
 
-            return ResponseEntity.ok(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(runningScheduleList)
+                    .message("SUCCESS")
+                    .build().toEntity(httpStatus);
         } catch (Exception e) {
             log.error("Failed to fetch my running schedule.", e);
 
-            result.put("error", "An internal server error occurred. Please try again later.");
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message("An internal server error occurred. Please try again later.")
+                    .build().toEntity(httpStatus);
         }
     }
 
     @DeleteMapping("/running-schedule/{runningScheduleId}")
-    public ResponseEntity<Map<String, Object>> handleDeleteRunningSchedule(@PathVariable(name="runningScheduleId") int runningScheduleId, HttpSession httpSession) {
+    public ResponseEntity<CommonApiResponse> handleDeleteRunningSchedule(@PathVariable(name="runningScheduleId") int runningScheduleId, HttpSession httpSession) {
         try {
-            result = new HashMap<>();
-
             String userId = (String) httpSession.getAttribute("userId");
             if (userId == null) {
-                result.put("error", "Login is required.");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
+                httpStatus = HttpStatus.UNAUTHORIZED;
+
+                return CommonApiResponse.builder()
+                        .statusCode(httpStatus.value())
+                        .data(null)
+                        .message("Login is required.")
+                        .build().toEntity(httpStatus);
             }
 
             RunningSchedule runningSchedule = runningScheduleService.getRunningScheduleById(runningScheduleId);
             if (!runningSchedule.getUserId().equals(userId)) {
-                result.put("error", "You do not have permission to delete this running schedule.");
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(result);
+                httpStatus = HttpStatus.FORBIDDEN;
+
+                return CommonApiResponse.builder()
+                        .statusCode(httpStatus.value())
+                        .data(null)
+                        .message("You do not have permission to delete this running schedule.")
+                        .build().toEntity(httpStatus);
             }
 
             runningScheduleService.deleteRunningSchedule(runningScheduleId);
 
-            result.put("message", "러닝 일정 삭제에 성공했습니다.");
+            httpStatus = HttpStatus.OK;
 
-            return ResponseEntity.ok(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .message("SUCCESS")
+                    .data(null)
+                    .build().toEntity(httpStatus);
         } catch (NoSuchRunningScheduleException e) {
             log.error("Failed to delete running schedule for running_schedule_id " + runningScheduleId, e);
 
-            result.put("error", e.getMessage());
+            httpStatus = HttpStatus.NOT_FOUND;
 
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message(e.getMessage())
+                    .build().toEntity(httpStatus);
         } catch (Exception e) {
             log.error("Failed to delete running schedule for running_schedule_id " + runningScheduleId, e);
 
-            result.put("error", "An internal server error occurred. Please try again later.");
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message("An internal server error occurred. Please try again later.")
+                    .build().toEntity(httpStatus);
         }
     }
 
     @PostMapping("/running-schedule/{runningScheduleId}/attend")
-    public ResponseEntity<Map<String, Object>> handleAttendRunningSchedule(@PathVariable(name="runningScheduleId") int runningScheduleId, HttpSession httpSession) {
+    public ResponseEntity<CommonApiResponse> handleAttendRunningSchedule(@PathVariable(name="runningScheduleId") int runningScheduleId, HttpSession httpSession) {
         try {
-            result = new HashMap<>();
-
             String userId = (String) httpSession.getAttribute("userId");
             if (userId == null) {
-                result.put("error", "Login is required.");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
+                httpStatus = HttpStatus.UNAUTHORIZED;
+
+                return CommonApiResponse.builder()
+                        .statusCode(httpStatus.value())
+                        .data(null)
+                        .message("Login is required.")
+                        .build().toEntity(httpStatus);
             }
 
             attendanceService.attendRunningSchedule(runningScheduleId, userId);
 
-            result.put("message", "러닝 스케줄 참여에 성공하였습니다.");
+            httpStatus = HttpStatus.OK;
 
-            return ResponseEntity.ok(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message("SUCCESS")
+                    .build().toEntity(httpStatus);
         } catch (NoSuchRunningScheduleException e) {
             log.error("Failed to attend running schedule for running_schedule_id " + runningScheduleId, e);
 
-            result.put("error", e.getMessage());
+            httpStatus = HttpStatus.NOT_FOUND;
 
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .message(e.getMessage())
+                    .data(null)
+                    .build().toEntity(httpStatus);
         } catch (DuplicateAttendingException e) {
             log.error("Failed to attend running schedule for running_schedule_id " + runningScheduleId, e);
 
-            result.put("error", e.getMessage());
+            httpStatus = HttpStatus.CONFLICT;
 
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message(e.getMessage())
+                    .build().toEntity(httpStatus);
         } catch (Exception e) {
             log.error("Failed to attend running schedule for running_schedule_id " + runningScheduleId, e);
 
-            result.put("error", "An internal server error occurred. Please try again later.");
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message("An internal server error occurred. Please try again later.")
+                    .build().toEntity(httpStatus);
         }
     }
 
     @DeleteMapping("/running-schedule/{runningScheduleId}/unattend")
-    public ResponseEntity<Map<String, Object>> handleUnattendRunningSchedule(@PathVariable(name="runningScheduleId") int runningScheduleId, HttpSession httpSession) {
+    public ResponseEntity<CommonApiResponse> handleUnattendRunningSchedule(@PathVariable(name="runningScheduleId") int runningScheduleId, HttpSession httpSession) {
         try {
-            result = new HashMap<>();
-
             String userId = (String) httpSession.getAttribute("userId");
             if (userId == null) {
-                result.put("error", "Login is required.");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
+                httpStatus = HttpStatus.UNAUTHORIZED;
+
+                return CommonApiResponse.builder()
+                        .statusCode(httpStatus.value())
+                        .data(null)
+                        .message("Login is required.")
+                        .build().toEntity(httpStatus);
             }
 
             attendanceService.unattendRunningSchedule(runningScheduleId, userId);
 
-            result.put("message", "러닝 스케줄 참여 취소에 성공하였습니다.");
+            httpStatus = HttpStatus.OK;
 
-            return ResponseEntity.ok(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message("SUCCESS")
+                    .build().toEntity(httpStatus);
         } catch (NoSuchRunningScheduleException e) {
             log.error("Failed to unattend running schedule for running_schedule_id " + runningScheduleId, e);
 
-            result.put("error", e.getMessage());
+            httpStatus = HttpStatus.NOT_FOUND;
 
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message(e.getMessage())
+                    .build().toEntity(httpStatus);
         } catch (CreatorCannotCancelException e) {
             log.error("Creator attempted to cancel their own schedule participation for running_schedule_id " + runningScheduleId, e);
 
-            result.put("error", e.getMessage());
+            httpStatus = HttpStatus.FORBIDDEN;
 
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message(e.getMessage())
+                    .build().toEntity(httpStatus);
         } catch (NotParticipatingException e) {
             log.error("Attempted to cancel participation for a schedule the user is not participating in for running_schedule_id " + runningScheduleId, e);
 
-            result.put("error", e.getMessage());
+            httpStatus = HttpStatus.CONFLICT;
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message(e.getMessage())
+                    .build().toEntity(httpStatus);
         } catch (Exception e) {
             log.error("Failed to unattend running schedule for running_schedule_id " + runningScheduleId, e);
 
-            result.put("error", "An internal server error occurred. Please try again later.");
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message("An internal server error occurred. Please try again later.")
+                    .build().toEntity(httpStatus);
         }
     }
 
     @PostMapping("/running-schedule")
-    public ResponseEntity<Map<String, Object>> handlePostRunningSchedule(@Valid @RequestBody RunningSchedulePostReq req, BindingResult bindingResult, HttpSession httpSession) {
+    public ResponseEntity<CommonApiResponse> handlePostRunningSchedule(@Valid @RequestBody RunningSchedulePostReq req, BindingResult bindingResult, HttpSession httpSession) {
         try {
-            result = new HashMap<>();
-
             String userId = (String) httpSession.getAttribute("userId");
             if (userId == null) {
-                result.put("error", "Login is required.");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
-            }
+              httpStatus = HttpStatus.UNAUTHORIZED;
 
-            System.out.println("Calendar Controller req: " + req);
+                return CommonApiResponse.builder()
+                        .statusCode(httpStatus.value())
+                        .data(null)
+                        .message("Login is required.")
+                        .build().toEntity(httpStatus);
+            }
 
             if (bindingResult.hasErrors()) {
                 log.error("Failed to post running schedule");
@@ -265,8 +352,12 @@ public class CalendarController {
                         .map(FieldError::getDefaultMessage)
                         .collect(Collectors.toList());
 
-                result.put("errors", errorMessages);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+                httpStatus = HttpStatus.BAD_REQUEST;
+                return CommonApiResponse.builder()
+                        .statusCode(httpStatus.value())
+                        .data(null)
+                        .message(errorMessages.toString())
+                        .build().toEntity(httpStatus);
             }
 
             req.validateDateAndTime();
@@ -275,21 +366,33 @@ public class CalendarController {
             runningSchedule.setUserId(userId);
             runningScheduleService.addRunningSchedule(runningSchedule);
 
-            result.put("message", "러닝 스케줄 저장에 성공하였습니다.");
+            httpStatus = HttpStatus.OK;
 
-            return ResponseEntity.ok(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message("SUCCESS")
+                    .build().toEntity(httpStatus);
         } catch (IllegalArgumentException e) {
             log.error("Failed to post running schedule", e);
 
-            result.put("error", e.getMessage());
+            httpStatus = HttpStatus.BAD_REQUEST;
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message(e.getMessage())
+                    .build().toEntity(httpStatus);
         } catch (Exception e) {
             log.error("Failed to post running schedule", e);
 
-            result.put("error", "An internal server error occurred. Please try again later.");
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message("An internal server error occurred. Please try again later.")
+                    .build().toEntity(httpStatus);
         }
     }
 }
