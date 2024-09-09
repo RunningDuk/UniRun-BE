@@ -1,5 +1,6 @@
 package com.runningduk.unirun.api.controller;
 
+import com.runningduk.unirun.api.response.CommonApiResponse;
 import com.runningduk.unirun.api.service.RunningDataService;
 import com.runningduk.unirun.domain.entity.RunningData;
 import com.runningduk.unirun.exceptions.NoSuchRunningDataException;
@@ -20,52 +21,65 @@ import java.util.Map;
 @RestController
 @RequestMapping("/my-running")
 public class MyRunningController {
-    HashMap<String, Object> result;
+    HttpStatus httpStatus;
 
     private final RunningDataService runningDataService;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @GetMapping
-    public ResponseEntity<Map<String, Object>> getMyRunningDataList(HttpSession httpSession) {
+    public ResponseEntity<CommonApiResponse> getMyRunningDataList(HttpSession httpSession) {
         String userId = null;
-        result = new HashMap<>();
         try {
             userId = (String) httpSession.getAttribute("userId");
             List<RunningData> myRunningDataList = runningDataService.getRunningDataListByUserId(userId);
 
-            result.put("myRunningDataList", myRunningDataList);
-
             log.info("Successfully fetched my running data list for user {}", userId);
 
-            return ResponseEntity.ok(result);
+            httpStatus = HttpStatus.OK;
+
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(myRunningDataList)
+                    .message("SUCCESS")
+                    .build().toEntity(httpStatus);
         } catch (Exception e) {
             log.error("Failed to fetch my running data list for user {}", userId, e);
 
-            result.put("error", "나의 러닝 기록 조회에 실패하였습니다.");
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 
-            return ResponseEntity.badRequest().body(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message("나의 러닝 기록 조회에 실패하였습니다.")
+                    .build().toEntity(httpStatus);
         }
     }
 
     @DeleteMapping("/{runningDataId}")
-    public ResponseEntity<Map<String, Object>> deleteRunningData(@PathVariable int runningDataId) {
+    public ResponseEntity<CommonApiResponse> deleteRunningData(@PathVariable int runningDataId) {
         try {
-            result = new HashMap<>();
-
             runningDataService.deleteRunningDataById(runningDataId);
-
-            result.put("msg", "러닝 기록 삭제에 성공하였습니다.");
 
             log.info("Successfully deleted running data list for runningDataId {}", runningDataId);
 
-            return ResponseEntity.ok(result);
+            httpStatus = HttpStatus.OK;
+
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message("SUCCESS")
+                    .build().toEntity(httpStatus);
         } catch (NoSuchRunningDataException e) {
             log.error("Failed to delete running data for runningDataId {}", runningDataId);
 
-            result.put("error", "runningDataId " + runningDataId + "에 해당하는 러닝 기록이 없습니다.");
+            httpStatus = HttpStatus.NOT_FOUND;
 
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message("runningDataId " + runningDataId + "에 해당하는 러닝 기록이 없습니다.")
+                    .build().toEntity(httpStatus);
         }
     }
 }
