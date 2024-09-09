@@ -80,6 +80,16 @@ public class MyRunningController {
                     .data(null)
                     .message("runningDataId " + runningDataId + "에 해당하는 러닝 기록이 없습니다.")
                     .build().toEntity(httpStatus);
+        } catch (Exception e) {
+            log.error("Failed to add running name", e);
+
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message("An internal server error occurred. Please try again later.")
+                    .build().toEntity(httpStatus);
         }
     }
 }
