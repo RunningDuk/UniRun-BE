@@ -17,10 +17,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -44,6 +46,13 @@ public class RunningTypeController {
 
         rsList.addAll(attendedSchedule);
         rsList.addAll(createdSchedules);
+
+        LocalDate today = LocalDate.now();
+
+        // 오늘 날짜의 러닝 스케줄만 필터링
+        rsList = rsList.stream()
+                .filter(runningSchedule -> runningSchedule.getRunningDate().toLocalDate().equals(today))
+                .collect(Collectors.toList());
 
         List<RunningTypeGetRes> typeNames = new ArrayList<>();
         typeNames.add(new RunningTypeGetRes("직접 입력"));
