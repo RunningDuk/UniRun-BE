@@ -114,6 +114,16 @@ public class RunningTypeController {
                     .data(null)
                     .message("러닝 이름 저장에 실패하였습니다.")
                     .build().toEntity(httpStatus);
+        } catch (Exception e) {
+            log.error("Failed to add running name", e);
+
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+
+            return CommonApiResponse.builder()
+                    .statusCode(httpStatus.value())
+                    .data(null)
+                    .message("An internal server error occurred. Please try again later.")
+                    .build().toEntity(httpStatus);
         }
     }
 }
