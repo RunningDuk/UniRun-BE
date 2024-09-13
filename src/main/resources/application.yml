@@ -17,6 +17,9 @@ spring:
     url: jdbc:mariadb://localhost:3306/unirun
     username: root
     password: root
+  jpa:
+    hibernate:
+      ddl-auto: update  # ddl-auto 설정 추가
 swagger:
   title: unirun
   version: v1.0
