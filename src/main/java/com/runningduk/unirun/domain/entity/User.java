@@ -15,12 +15,11 @@ import lombok.Setter;
 public class User {
     @Id
     @Column(name="user_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int userId;
+    private String userId;
 
     private String goal;
 
-    @Column(name="nick_name")
+    @Column(name="nickname")
     private String nickName;
 
     private double height;
