@@ -3,6 +3,7 @@ package com.runningduk.unirun.api.controller;
 import com.runningduk.unirun.api.response.CommonApiResponse;
 import com.runningduk.unirun.api.service.RunningDataService;
 import com.runningduk.unirun.domain.entity.RunningData;
+import com.runningduk.unirun.domain.entity.RunningSchedule;
 import com.runningduk.unirun.exceptions.NoSuchRunningDataException;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -57,8 +58,22 @@ public class MyRunningController {
     }
 
     @DeleteMapping("/{runningDataId}")
-    public ResponseEntity<CommonApiResponse> deleteRunningData(@PathVariable int runningDataId) {
+    public ResponseEntity<CommonApiResponse> deleteRunningData(@PathVariable int runningDataId, HttpSession httpSession) {
         try {
+            String userId = (String) httpSession.getAttribute("userId");
+
+            RunningData runningData = runningDataService.getRunningDataById(runningDataId);
+
+            if (runningData.getUserId().equals(userId)) {
+                httpStatus = HttpStatus.UNAUTHORIZED;
+
+                return CommonApiResponse.builder()
+                        .statusCode(httpStatus.value())
+                        .data(null)
+                        .message("You do not have permission to delete this running data.")
+                        .build().toEntity(httpStatus);
+            }
+
             runningDataService.deleteRunningDataById(runningDataId);
 
             log.info("Successfully deleted running data list for runningDataId {}", runningDataId);

@@ -94,16 +94,6 @@ public class CalendarController {
         try {
             String userId = (String) session.getAttribute("userId");
 
-            if (userId == null) {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-
-                return CommonApiResponse.builder()
-                        .statusCode(httpStatus.value())
-                        .data(null)
-                        .message("Login is required.")
-                        .build().toEntity(httpStatus);
-            }
-
             List<MyRunningSchedulesGetRes> runningScheduleList = new ArrayList<>();
 
             List<RunningSchedule> userCreatedSchedules = runningScheduleService.getRunningScheduleListByUserId(userId);
@@ -156,15 +146,6 @@ public class CalendarController {
     public ResponseEntity<CommonApiResponse> handleDeleteRunningSchedule(@PathVariable(name="runningScheduleId") int runningScheduleId, HttpSession httpSession) {
         try {
             String userId = (String) httpSession.getAttribute("userId");
-            if (userId == null) {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-
-                return CommonApiResponse.builder()
-                        .statusCode(httpStatus.value())
-                        .data(null)
-                        .message("Login is required.")
-                        .build().toEntity(httpStatus);
-            }
 
             RunningSchedule runningSchedule = runningScheduleService.getRunningScheduleById(runningScheduleId);
             if (!runningSchedule.getUserId().equals(userId)) {
@@ -213,15 +194,6 @@ public class CalendarController {
     public ResponseEntity<CommonApiResponse> handleAttendRunningSchedule(@PathVariable(name="runningScheduleId") int runningScheduleId, HttpSession httpSession) {
         try {
             String userId = (String) httpSession.getAttribute("userId");
-            if (userId == null) {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-
-                return CommonApiResponse.builder()
-                        .statusCode(httpStatus.value())
-                        .data(null)
-                        .message("Login is required.")
-                        .build().toEntity(httpStatus);
-            }
 
             attendanceService.attendRunningSchedule(runningScheduleId, userId);
 
@@ -269,15 +241,6 @@ public class CalendarController {
     public ResponseEntity<CommonApiResponse> handleUnattendRunningSchedule(@PathVariable(name="runningScheduleId") int runningScheduleId, HttpSession httpSession) {
         try {
             String userId = (String) httpSession.getAttribute("userId");
-            if (userId == null) {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-
-                return CommonApiResponse.builder()
-                        .statusCode(httpStatus.value())
-                        .data(null)
-                        .message("Login is required.")
-                        .build().toEntity(httpStatus);
-            }
 
             attendanceService.unattendRunningSchedule(runningScheduleId, userId);
 
@@ -335,15 +298,6 @@ public class CalendarController {
     public ResponseEntity<CommonApiResponse> handlePostRunningSchedule(@Valid @RequestBody RunningSchedulePostReq req, BindingResult bindingResult, HttpSession httpSession) {
         try {
             String userId = (String) httpSession.getAttribute("userId");
-            if (userId == null) {
-              httpStatus = HttpStatus.UNAUTHORIZED;
-
-                return CommonApiResponse.builder()
-                        .statusCode(httpStatus.value())
-                        .data(null)
-                        .message("Login is required.")
-                        .build().toEntity(httpStatus);
-            }
 
             if (bindingResult.hasErrors()) {
                 log.error("Failed to post running schedule");
