@@ -2,7 +2,7 @@ jasypt:
   encryptor:
     bean: jasyptEncryptor
     key:
-sever:
+server:
   servlet:
     session:
       cookie:
@@ -20,6 +20,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update  # ddl-auto 설정 추가
+  session:
+    store-type: redis
+  redis:
+    host: redis-19960.c340.ap-northeast-2-1.ec2.redns.redis-cloud.com
+    port: 19960
+    password: # 노션 참고하여 redis password 작성 후 실행
 swagger:
   title: unirun
   version: v1.0
