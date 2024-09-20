@@ -8,8 +8,8 @@
     </select>
 
     <insert id="insertUser" parameterType="com.runningduk.unirun.domain.model.UserModel">
-        INSERT INTO user (user_id,goal,nickname,height,weight,birth_year,gender,user_uni_name)
-        VALUES(#{userId},#{goal},#{nickname},#{height},#{weight}, #{birthYear},#{gender},#{userUniName});
+        INSERT INTO user (user_id,goal,nickname,height,weight,birth_year,gender,user_uni_name, wallet_address)
+        VALUES(#{userId},#{goal},#{nickname},#{height},#{weight}, #{birthYear},#{gender},#{userUniName}, #{walletAddress});
     </insert>
     <update id="updateUser" parameterType="com.runningduk.unirun.domain.model.UserModel">
         UPDATE user SET
@@ -19,7 +19,8 @@
             weight = #{weight},
             birth_year = #{birthYear},
             gender = #{gender},
-            user_uni_name = #{userUniName}
+            user_uni_name = #{userUniName},
+            wallet_address = #{walletAddress}
         where user_id = #{userId}
     </update>
 

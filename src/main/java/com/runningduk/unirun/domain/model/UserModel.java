@@ -21,4 +21,6 @@ public class UserModel {
     private double weight;
     @Schema(description = "사용자 목표")
     private String goal;
+    @Schema(description = "지갑 주소")
+    private String walletAddress;
 }

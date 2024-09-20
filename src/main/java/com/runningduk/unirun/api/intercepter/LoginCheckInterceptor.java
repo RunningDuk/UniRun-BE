@@ -29,6 +29,7 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
 
             return false;
         }
+
         // 로그인 되어있을 떄
         return true;
     }
