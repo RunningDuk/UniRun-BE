@@ -33,4 +33,7 @@ public class User {
 
     @Column(name="user_uni_name")
     private String uniName;
+
+    @Column(name="wallet_address")
+    private String walletAddress;
 }
