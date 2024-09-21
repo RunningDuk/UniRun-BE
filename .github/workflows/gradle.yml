@@ -31,7 +31,8 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo pwd
+          echo "Current working directory:"
+          pwd
           echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
           echo "DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}" >> .env
@@ -57,7 +58,8 @@ jobs:
           port: 22
           script: |
             # cd ./unirun
-            echo pwd
+            echo "Current working directory:"
+            pwd
             docker-compose pull
             docker-compose down
             docker-compose up -d springboot 
