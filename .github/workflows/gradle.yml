@@ -55,7 +55,7 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           port: 22
           script: |
-            cd ./unirun
+            # cd ./unirun
             docker-compose pull
             docker-compose down
             docker-compose up -d springboot 
