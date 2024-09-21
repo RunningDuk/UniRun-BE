@@ -1,0 +1,50 @@
+jasypt:
+  encryptor:
+    bean: jasyptEncryptor
+    key: # VM 옵션으로 줬던 값 입력
+server:
+  servlet:
+    session:
+      cookie:
+        #domain: localhost
+        same-site: "none"
+        secure: true
+spring:
+  application:
+    name: unirun-be
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:3306/unirun
+    username: root
+    password:  # DB password 추가해서 사용
+  jpa:
+    hibernate:
+      ddl-auto: update  # ddl-auto 설정 추가
+  session:
+    store-type: redis
+  redis:
+    host: redis-19960.c340.ap-northeast-2-1.ec2.redns.redis-cloud.com
+    port: 19960
+    password: # 노션 참고하여 redis password 작성 후 실행
+swagger:
+  title: unirun
+  version: v1.0
+  description: API
+springdoc:
+  api-docs:
+    path: /swagger-ui
+kakao:
+  client-id: 7845a080f472eabd0d3ca3a3152d1962 # 카카오 개발자 센터에서 발급받은 Client ID
+  client-secret: ENC(y8m1EuZACvJkcna210K5dfEBi8lJt2AlM3MMMOqzJtQDHoG2pdzRsav0NkwuU3B/)
+  redirect-uri: "http://localhost:8888/returnPage.jsp"
+  logout-uri: https://kauth.kakao.com/oauth/logout
+  logout-redirect-uri: http://localhost:8888/login.html
+  authorization-grant-type: authorization_code
+  authorization-uri: https://kauth.kakao.com/oauth/authorize
+  token-uri: https://kauth.kakao.com/oauth/token
+  user-info-uri: https://kapi.kakao.com/v2/user/me
+  user-name-attribute: id
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true

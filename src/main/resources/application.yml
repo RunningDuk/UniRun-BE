@@ -1,0 +1,50 @@
+jasypt:
+  encryptor:
+    bean: jasyptEncryptor
+    key: ${JASYPT_ENCRYPTOR_KEY}  # Jasypt 암호화 키 환경 변수로 설정
+server:
+  servlet:
+    session:
+      cookie:
+        #domain: localhost
+        same-site: "none"
+        secure: true
+spring:
+  application:
+    name: unirun-be
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}  # DB 사용자 이름 환경 변수로 설정
+    password: ${DB_PASSWORD}  # DB 비밀번호 환경 변수로 설정
+  jpa:
+    hibernate:
+      ddl-auto: update  # ddl-auto 설정 추가
+  session:
+    store-type: redis
+  redis:
+    host: redis-19960.c340.ap-northeast-2-1.ec2.redns.redis-cloud.com
+    port: 19960
+    password: ${REDIS_PASSWORD}  # Redis 비밀번호 환경 변수로 설정
+swagger:
+  title: unirun
+  version: v1.0
+  description: API
+springdoc:
+  api-docs:
+    path: /swagger-ui
+kakao:
+  client-id: ${KAKAO_CLIENT_ID}  # 카카오 API Client ID 환경 변수로 설정
+  client-secret: ${KAKAO_CLIENT_SECRET}  # 카카오 API Client Secret 환경 변수로 설정 (Jasypt로 암호화된 값이 아닌 시크릿에서 직접 사용)
+  redirect-uri: "http://localhost:8888/returnPage.jsp"
+  logout-uri: https://kauth.kakao.com/oauth/logout
+  logout-redirect-uri: http://localhost:8888/login.html
+  authorization-grant-type: authorization_code
+  authorization-uri: https://kauth.kakao.com/oauth/authorize
+  token-uri: https://kauth.kakao.com/oauth/token
+  user-info-uri: https://kapi.kakao.com/v2/user/me
+  user-name-attribute: id
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true

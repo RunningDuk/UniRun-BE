@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTO Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.runningduk.unirun.domain.repository.UserMapper">
+    <select id="selectUser" resultType="com.runningduk.unirun.domain.model.UserModel" parameterType="java.lang.String">
+        SELECT * FROM user where user_id = #{userId}
+    </select>
+
+    <insert id="insertUser" parameterType="com.runningduk.unirun.domain.model.UserModel">
+        INSERT INTO user (user_id,goal,nickname,height,weight,birth_year,gender,user_uni_name, wallet_address)
+        VALUES(#{userId},#{goal},#{nickname},#{height},#{weight}, #{birthYear},#{gender},#{userUniName}, #{walletAddress});
+    </insert>
+    <update id="updateUser" parameterType="com.runningduk.unirun.domain.model.UserModel">
+        UPDATE user SET
+            goal = #{goal},
+            nickname = #{nickname},
+            height = #{height},
+            weight = #{weight},
+            birth_year = #{birthYear},
+            gender = #{gender},
+            user_uni_name = #{userUniName},
+            wallet_address = #{walletAddress}
+        where user_id = #{userId}
+    </update>
+
+    <delete id="deleteUser" parameterType="java.lang.String">
+        DELETE FROM user where user_id = #{userId}
+    </delete>
+</mapper>
