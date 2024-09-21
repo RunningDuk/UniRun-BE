@@ -57,7 +57,7 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           port: 22
           script: |
-            # cd ./unirun
+            cd /home/runner/work/UniRun-BE/UniRun-BE
             echo "Current working directory:"
             pwd
             docker-compose pull
