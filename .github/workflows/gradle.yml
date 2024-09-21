@@ -42,9 +42,9 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         if: contains(github.ref, 'main')
         with:
-          host: ${{ secrets.MAIN_HOST }}
-          username: ${{ secrets.MAIN_USERNAME }}
-          key: ${{ secrets.MAIN_SSH_KEY }}
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
           port: 22
           script: |
             docker-compose pull
