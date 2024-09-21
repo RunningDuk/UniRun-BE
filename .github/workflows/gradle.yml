@@ -68,7 +68,6 @@ jobs:
           port: 22
           script: |
             # EC2 서버에서의 프로젝트 경로로 이동
-            cd /home/ubuntu/unirun/server/spring-boot  # EC2 서버의 절대 경로로 변경
             echo "Current working directory:"
             pwd
             # Docker Compose 실행
