@@ -3,7 +3,7 @@ name: Unirun Spring Boot server build and deploy
 on:
   push:
     branches:
-      -main
+      - main
 
 jobs:
   build-and-deploy:
