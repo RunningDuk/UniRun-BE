@@ -18,9 +18,8 @@ jobs:
       JASYPT_ENCRYPTOR_KEY: ${{ secrets.JASYPT_ENCRYPTOR_KEY }}
       KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
       KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
-      working-directory: ./unirun/server/spring-boot
 
-    steps: 
+    steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -32,7 +31,7 @@ jobs:
 
       - name: Build JAR file
         run: ./gradlew build -x test
-        working-directory: ${{ env.working-directory }}  # 여기에 작업 디렉토리 설정
+        working-directory: /home/ubuntu/unirun/server/spring-boot  # 스프링 부트 프로젝트 경로로 설정
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -41,25 +40,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.CONTAINER_REGISTRY_TOKEN }}
 
-#      - name: Create .env file
-#        run: |
-#          echo "Current working directory:"
-#          pwd
-#          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-#          echo "DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}" >> .env
-#          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
-#          echo "JASYPT_ENCRYPTOR_KEY=${{ secrets.JASYPT_ENCRYPTOR_KEY }}" >> .env
-#          echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
-#          echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
-#        working-directory: ./unirun-spring-boot  # 여기에 작업 디렉토리 설정
-
-#      - name: Check if .env file exists
-#        run: |
-#          echo "Listing current directory: "
-#          ls -la
-#          echo "Contents of .env file: "
-#          cat .env
-#        working-directory: ./unirun-spring-boot  # 여기에 작업 디렉토리 설정
+      - name: Create .env file
+        run: |
+          echo "Current working directory:"
+          pwd
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}" >> .env
+          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
+          echo "JASYPT_ENCRYPTOR_KEY=${{ secrets.JASYPT_ENCRYPTOR_KEY }}" >> .env
+          echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
+          echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
+        working-directory: ./unirun/server/spring-boot  # 스프링 부트 프로젝트 경로로 설정
 
       - name: Check if .env file exists
         run: |
@@ -67,6 +58,7 @@ jobs:
           ls -la
           echo "Contents of .env file: "
           cat .env
+        working-directory: ./unirun/server/spring-boot  # 스프링 부트 프로젝트 경로로 설정
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
@@ -77,9 +69,11 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           port: 22
           script: |
-            cd ./unirun-spring-boot 
+            # EC2 서버에서의 프로젝트 경로로 이동
+            cd /home/ubuntu/unirun/server/spring-boot  # EC2 서버의 절대 경로로 변경
             echo "Current working directory:"
             pwd
+            # Docker Compose 실행
             docker-compose pull
             docker-compose down
             docker-compose up -d springboot
