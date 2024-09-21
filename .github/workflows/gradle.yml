@@ -31,6 +31,7 @@ jobs:
 
       - name: Create .env file
         run: |
+          cd ./unirun
           echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
           echo "DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}" >> .env
@@ -38,6 +39,13 @@ jobs:
           echo "JASYPT_ENCRYPTOR_KEY=${{ secrets.JASYPT_ENCRYPTOR_KEY }}" >> .env
           echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
           echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
+
+      - name: Check if .env file exists
+        run: |
+          echo "Listing current directory: "
+          ls -la
+          echo "Contents of .env file: "
+          cat .env
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
