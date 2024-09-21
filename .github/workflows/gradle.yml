@@ -9,6 +9,8 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      working-directory: ./unirun-spring-boot
     steps: 
       - name: Checkout code
         uses: actions/checkout@v2
@@ -57,7 +59,6 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           port: 22
           script: |
-            cd /home/runner/work/UniRun-BE/UniRun-BE
             echo "Current working directory:"
             pwd
             docker-compose pull
