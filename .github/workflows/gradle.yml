@@ -48,7 +48,7 @@ jobs:
           context: .
           file: ./Dockerfile  # Dockerfile 경로
           push: true
-          tags: ghcr.io/unirun/unirun-api-server:v1.0  # 현재 액션 실행자의 이름으로 이미지 태그 생성
+          tags: ghcr.io/${{ github.repository }}:v1.0  # 현재 액션 실행자의 이름으로 이미지 태그 생성
 
 #      - name: Create .env file
 #        run: |
