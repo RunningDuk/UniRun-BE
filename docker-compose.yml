@@ -1,16 +1,8 @@
-version: '3.8'
+version: '3.3'
 
 services:
   springboot:
     image: ghcr.io/unirun/unirun-api-server:latest
-    environment:
-      - DB_URL=jdbc:mysql://db:3306/unirun
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - REDIS_PASSWORD=${REDIS_PASSWORD}  # Redis 비밀번호도 환경 변수로 설정
-      - JASYPT_ENCRYPTOR_KEY=${JASYPT_ENCRYPTOR_KEY}  # Jasypt 암호화 키
-      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}  # Kakao API Client ID
-      - KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}  # Kakao API Client Secret
     ports:
       - "8080:8080"
     depends_on:
@@ -20,13 +12,18 @@ services:
     image: mariadb:latest
     container_name: unirun-db
     environment:
-      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=unirun
-      - MYSQL_USER=${DB_USERNAME}
-      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
     ports:
       - "3306:3306"
     volumes:
-      - db_data:/var/lib/mysql
-volumes:
-  db_data:
+      - ~/docker/mariadb/etc/mysql/conf.d/etc/mysql/conf.d:ro
+      - ~/docker/mariadb/var/lib/mysql:/var/lib/mysqql
+      - ~/docker/mariadb/var/log/mariadb:/var/log/mariadb
+    networks:
+      - backend
+
+networks:
+  backend:
