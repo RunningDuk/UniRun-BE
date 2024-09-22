@@ -39,17 +39,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.CONTAINER_REGISTRY_TOKEN }}
 
-      - name: Create .env file
-        run: |
-          echo "Current working directory:"
-          pwd
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}" >> .env
-          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
-          echo "JASYPT_ENCRYPTOR_KEY=${{ secrets.JASYPT_ENCRYPTOR_KEY }}" >> .env
-          echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
-          echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
-        working-directory: /home/ubuntu 
+#      - name: Create .env file
+#        run: |
+#          echo "Current working directory:"
+#                    pwd
+#                    echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+#                    echo "DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}" >> .env
+#                    echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
+#                    echo "JASYPT_ENCRYPTOR_KEY=${{ secrets.JASYPT_ENCRYPTOR_KEY }}" >> .env
+#                    echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
+#                    echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
+#        working-directory: /home/ubuntu
 #
 #      - name: Check if .env file exists
 #        run: |
@@ -67,7 +67,6 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           port: 22
           script: |
-            # EC2 서버에서의 프로젝트 경로로 이동
             echo "Current working directory:"
             pwd
             # Docker Compose 실행
