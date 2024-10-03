@@ -4,10 +4,11 @@ on:
   push:
     branches:
       - main
+      - develop
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     env:
@@ -51,32 +52,42 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.actor }}/unirun-api-server:v1.0  # 현재 액션 실행자의 이름으로 이미지 태그 생성
 
-#      - name: Create .env file
-#        run: |
-#          echo "Current working directory:"
-#                    pwd
-#                    echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-#                    echo "DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}" >> .env
-#                    echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
-#                    echo "JASYPT_ENCRYPTOR_KEY=${{ secrets.JASYPT_ENCRYPTOR_KEY }}" >> .env
-#                    echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
-#                    echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
-#        working-directory: /home/ubuntu
-#
-#      - name: Check if .env file exists
-#        run: |
-#          echo "Listing current directory: "
-#          ls -la
-#          echo "Contents of .env file: "
-#          cat .env
+  deploy-main:
+    runs-on: ubuntu-latest
+    needs: build  # build 작업이 완료된 후 실행
+    if: github.ref == 'refs/heads/main'  # main 브랜치에서만 실행
 
-      - name: Deploy to EC2
+    steps:
+      - name: Deploy to EC2 Main
         uses: appleboy/ssh-action@v1.0.3
-        if: contains(github.ref, 'main')
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
+          port: 22
+          script: |
+            echo "Current working directory:"
+            pwd
+            
+            echo ${{ secrets.CONTAINER_REGISTRY_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            # Docker Compose 실행
+            docker-compose pull
+            docker-compose down
+            docker-compose up -d springboot
+
+  deploy-develop:
+    runs-on: ubuntu-latest
+    needs: build  # build 작업이 완료된 후 실행
+    if: github.ref == 'refs/heads/develop'  # develop 브랜치에서만 실행
+
+    steps:
+      - name: Deploy to EC2 Develop
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_DEV_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_DEV_KEY }}
           port: 22
           script: |
             echo "Current working directory:"
