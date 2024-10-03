@@ -9,6 +9,7 @@ server:
         #domain: localhost
         same-site: "none"
         secure: true
+        name: SESSIONID  # Node.js와 동일한 세션 이름 설정
 spring:
   application:
     name: unirun-be
