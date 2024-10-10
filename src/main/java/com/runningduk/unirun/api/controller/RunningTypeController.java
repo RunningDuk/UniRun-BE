@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/running")
 public class RunningTypeController {
-    HttpStatus httpStatus;
+    HttpStatus httpStatus = HttpStatus.OK;
 
     private final AttendanceService attendanceService;
     private final RunningDataService runningDataService;
@@ -65,8 +65,6 @@ public class RunningTypeController {
         try {
             log.info("Successfully fetched running types for user {}", userId);
 
-            httpStatus = HttpStatus.OK;
-
             return CommonApiResponse.builder()
                     .statusCode(httpStatus.value())
                     .message("SUCCESS")
@@ -75,10 +73,8 @@ public class RunningTypeController {
         } catch (Exception e) {
             log.error("Failed to fetch running types for user {}", userId, e);
 
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .message("러닝 타입 조회에 실패하였습니다.")
                     .data(null)
                     .build().toEntity(httpStatus);
@@ -97,8 +93,6 @@ public class RunningTypeController {
 
             log.info("Successfully updated running name for runningDataId {}", runningDataId);
 
-            httpStatus = HttpStatus.OK;
-
             return CommonApiResponse.builder()
                     .statusCode(httpStatus.value())
                     .data(null)
@@ -107,20 +101,16 @@ public class RunningTypeController {
         } catch (NoSuchRunningDataException e) {
             log.error("Failed to update running name for runningDataId {}", runningDataId, e);
 
-            httpStatus = HttpStatus.NOT_FOUND;
-
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.NOT_FOUND.value())
                     .data(null)
                     .message("러닝 이름 저장에 실패하였습니다.")
                     .build().toEntity(httpStatus);
         } catch (Exception e) {
             log.error("Failed to add running name", e);
 
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .data(null)
                     .message("An internal server error occurred. Please try again later.")
                     .build().toEntity(httpStatus);

@@ -30,7 +30,7 @@ public class UserController {
 
     private final UserService userService;
     private final View error;
-    HttpStatus httpStatus;
+    HttpStatus httpStatus = HttpStatus.OK;
 
     @RequestMapping(value = "/user/auth", method = RequestMethod.POST)
     public ResponseEntity<CommonApiResponse> getKakaoProfile(@RequestBody Map<String, Object> requestData, HttpServletRequest request, HttpSession session) {
@@ -39,16 +39,14 @@ public class UserController {
 
         UserModel userInfo = userService.getKakaoId(code,request);
         if (userInfo == null) {
-            httpStatus = HttpStatus.BAD_REQUEST;
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.BAD_REQUEST.value())
                     .message("카카오 로그인 실패")
                     .data(null)
                     .build()
                     .toEntity(httpStatus);
         }
         else {
-            httpStatus = HttpStatus.OK;
             session.setAttribute("userId", userInfo.getUserId());
 
             return  CommonApiResponse.builder()
@@ -67,7 +65,6 @@ public class UserController {
         UserModel userModel = userService.selectUser(userId);
 
         if (userModel != null) {
-            httpStatus = HttpStatus.OK;
             return CommonApiResponse.builder()
                     .statusCode(httpStatus.value())
                     .message("success")
@@ -76,9 +73,8 @@ public class UserController {
                     .toEntity(httpStatus);
         }
         else {
-            httpStatus = HttpStatus.NOT_FOUND;
             return  CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.NOT_FOUND.value())
                     .message("사용자 없음")
                     .data(null)
                     .build()
@@ -94,18 +90,16 @@ public class UserController {
         int result = userService.insertUser(userModel);
 
         if (result == 1) {
-            httpStatus = HttpStatus.CREATED;
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.CREATED.value())
                     .message("회원가입 성공")
                     .data(result)
                     .build()
                     .toEntity(httpStatus);
         }
         else {
-            httpStatus = HttpStatus.BAD_REQUEST;
             return  CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.BAD_REQUEST.value())
                     .message("회원가입 실패")
                     .data(result)
                     .build()
@@ -121,7 +115,7 @@ public class UserController {
             session.invalidate();
             KakaoLogoutModel kakaoLogoutModel = new KakaoLogoutModel();
             kakaoLogoutModel = userService.getKakaLogOutInfo();
-            httpStatus = HttpStatus.OK;
+
             return CommonApiResponse.builder()
                     .statusCode(httpStatus.value())
                     .message("success")
@@ -130,9 +124,8 @@ public class UserController {
                     .toEntity(httpStatus);
 
         }catch (Exception e) {
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .message("로그아웃 실패")
                     .data(null)
                     .build()

@@ -32,7 +32,7 @@ public class CalendarController {
     private final RunningScheduleService runningScheduleService;
     private final AttendanceService attendanceService;
 
-    HttpStatus httpStatus;
+    HttpStatus httpStatus = HttpStatus.OK;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -40,8 +40,6 @@ public class CalendarController {
     public ResponseEntity<CommonApiResponse> handleGetRunningSchedulesMonthly(@RequestParam(name="year") int year, @RequestParam(name="month") int month) {
         try {
             List<Date> runningDateList = runningScheduleService.getRunningScheduleMonthly(year, month);
-
-            httpStatus = HttpStatus.OK;
 
             return CommonApiResponse.builder()
                     .statusCode(httpStatus.value())
@@ -51,13 +49,11 @@ public class CalendarController {
         } catch (Exception e) {
             log.error("Failed to fetch monthly running schedules.", e);
 
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .data(null)
                     .message("An internal server error occurred. Please try again later.")
-                    .build().toEntity(httpStatus);
+                    .build().toEntity(HttpStatus.OK);
         }
     }
 
@@ -69,8 +65,6 @@ public class CalendarController {
         try {
             List<RunningSchedule> runningScheduleList = runningScheduleService.getRunningScheduleByDate(year, month, day);
 
-            httpStatus = HttpStatus.OK;
-
             return CommonApiResponse.builder()
                     .statusCode(httpStatus.value())
                     .message("SUCCESS")
@@ -79,10 +73,8 @@ public class CalendarController {
         } catch (Exception e) {
             log.error("Failed to fetch daily running schedules.", e);
 
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .data(null)
                     .message("An internal server error occurred. Please try again later.")
                     .build().toEntity(httpStatus);
@@ -122,8 +114,6 @@ public class CalendarController {
                 runningScheduleList.add(res);
             }
 
-            httpStatus = HttpStatus.OK;
-
             return CommonApiResponse.builder()
                     .statusCode(httpStatus.value())
                     .data(runningScheduleList)
@@ -132,10 +122,8 @@ public class CalendarController {
         } catch (Exception e) {
             log.error("Failed to fetch my running schedule.", e);
 
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .data(null)
                     .message("An internal server error occurred. Please try again later.")
                     .build().toEntity(httpStatus);
@@ -149,18 +137,14 @@ public class CalendarController {
 
             RunningSchedule runningSchedule = runningScheduleService.getRunningScheduleById(runningScheduleId);
             if (!runningSchedule.getUserId().equals(userId)) {
-                httpStatus = HttpStatus.FORBIDDEN;
-
                 return CommonApiResponse.builder()
-                        .statusCode(httpStatus.value())
+                        .statusCode(HttpStatus.FORBIDDEN.value())
                         .data(null)
                         .message("You do not have permission to delete this running schedule.")
                         .build().toEntity(httpStatus);
             }
 
             runningScheduleService.deleteRunningSchedule(runningScheduleId);
-
-            httpStatus = HttpStatus.OK;
 
             return CommonApiResponse.builder()
                     .statusCode(httpStatus.value())
@@ -170,20 +154,16 @@ public class CalendarController {
         } catch (NoSuchRunningScheduleException e) {
             log.error("Failed to delete running schedule for running_schedule_id " + runningScheduleId, e);
 
-            httpStatus = HttpStatus.NOT_FOUND;
-
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.NOT_FOUND.value())
                     .data(null)
                     .message(e.getMessage())
                     .build().toEntity(httpStatus);
         } catch (Exception e) {
             log.error("Failed to delete running schedule for running_schedule_id " + runningScheduleId, e);
 
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .data(null)
                     .message("An internal server error occurred. Please try again later.")
                     .build().toEntity(httpStatus);
@@ -197,8 +177,6 @@ public class CalendarController {
 
             attendanceService.attendRunningSchedule(runningScheduleId, userId);
 
-            httpStatus = HttpStatus.OK;
-
             return CommonApiResponse.builder()
                     .statusCode(httpStatus.value())
                     .data(null)
@@ -207,30 +185,24 @@ public class CalendarController {
         } catch (NoSuchRunningScheduleException e) {
             log.error("Failed to attend running schedule for running_schedule_id " + runningScheduleId, e);
 
-            httpStatus = HttpStatus.NOT_FOUND;
-
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.NOT_FOUND.value())
                     .message(e.getMessage())
                     .data(null)
                     .build().toEntity(httpStatus);
         } catch (DuplicateAttendingException e) {
             log.error("Failed to attend running schedule for running_schedule_id " + runningScheduleId, e);
 
-            httpStatus = HttpStatus.CONFLICT;
-
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.CONFLICT.value())
                     .data(null)
                     .message(e.getMessage())
                     .build().toEntity(httpStatus);
         } catch (Exception e) {
             log.error("Failed to attend running schedule for running_schedule_id " + runningScheduleId, e);
 
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .data(null)
                     .message("An internal server error occurred. Please try again later.")
                     .build().toEntity(httpStatus);
@@ -244,8 +216,6 @@ public class CalendarController {
 
             attendanceService.unattendRunningSchedule(runningScheduleId, userId);
 
-            httpStatus = HttpStatus.OK;
-
             return CommonApiResponse.builder()
                     .statusCode(httpStatus.value())
                     .data(null)
@@ -254,40 +224,32 @@ public class CalendarController {
         } catch (NoSuchRunningScheduleException e) {
             log.error("Failed to unattend running schedule for running_schedule_id " + runningScheduleId, e);
 
-            httpStatus = HttpStatus.NOT_FOUND;
-
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.NOT_FOUND.value())
                     .data(null)
                     .message(e.getMessage())
                     .build().toEntity(httpStatus);
         } catch (CreatorCannotCancelException e) {
             log.error("Creator attempted to cancel their own schedule participation for running_schedule_id " + runningScheduleId, e);
 
-            httpStatus = HttpStatus.FORBIDDEN;
-
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.FORBIDDEN.value())
                     .data(null)
                     .message(e.getMessage())
                     .build().toEntity(httpStatus);
         } catch (NotParticipatingException e) {
             log.error("Attempted to cancel participation for a schedule the user is not participating in for running_schedule_id " + runningScheduleId, e);
 
-            httpStatus = HttpStatus.CONFLICT;
-
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.CONFLICT.value())
                     .data(null)
                     .message(e.getMessage())
                     .build().toEntity(httpStatus);
         } catch (Exception e) {
             log.error("Failed to unattend running schedule for running_schedule_id " + runningScheduleId, e);
 
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .data(null)
                     .message("An internal server error occurred. Please try again later.")
                     .build().toEntity(httpStatus);
@@ -306,9 +268,8 @@ public class CalendarController {
                         .map(FieldError::getDefaultMessage)
                         .collect(Collectors.toList());
 
-                httpStatus = HttpStatus.BAD_REQUEST;
                 return CommonApiResponse.builder()
-                        .statusCode(httpStatus.value())
+                        .statusCode(HttpStatus.BAD_REQUEST.value())
                         .data(null)
                         .message(errorMessages.toString())
                         .build().toEntity(httpStatus);
@@ -320,8 +281,6 @@ public class CalendarController {
             runningSchedule.setUserId(userId);
             runningScheduleService.addRunningSchedule(runningSchedule);
 
-            httpStatus = HttpStatus.OK;
-
             return CommonApiResponse.builder()
                     .statusCode(httpStatus.value())
                     .data(null)
@@ -330,20 +289,16 @@ public class CalendarController {
         } catch (IllegalArgumentException e) {
             log.error("Failed to post running schedule", e);
 
-            httpStatus = HttpStatus.BAD_REQUEST;
-
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.BAD_REQUEST.value())
                     .data(null)
                     .message(e.getMessage())
                     .build().toEntity(httpStatus);
         } catch (Exception e) {
             log.error("Failed to post running schedule", e);
 
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .data(null)
                     .message("An internal server error occurred. Please try again later.")
                     .build().toEntity(httpStatus);
