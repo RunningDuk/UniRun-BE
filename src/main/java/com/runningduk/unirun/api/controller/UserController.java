@@ -8,6 +8,7 @@ import com.runningduk.unirun.domain.entity.User;
 import com.runningduk.unirun.domain.model.KakaoLogoutModel;
 import com.runningduk.unirun.domain.model.UserModel;
 import com.runningduk.unirun.api.service.UserService;
+import com.runningduk.unirun.exceptions.UserNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -19,8 +20,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.View;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -34,27 +37,49 @@ public class UserController {
 
     @RequestMapping(value = "/user/auth", method = RequestMethod.POST)
     public ResponseEntity<CommonApiResponse> getKakaoProfile(@RequestBody Map<String, Object> requestData, HttpServletRequest request, HttpSession session) {
-        String code = (String) requestData.get("code");
-        System.out.println("code ====>>>>"+code);
+        try {
+            String code = (String) requestData.get("code");
+            System.out.println("code ====>>>>" + code);
 
-        UserModel userInfo = userService.getKakaoId(code,request);
-        if (userInfo == null) {
-            return CommonApiResponse.builder()
-                    .statusCode(HttpStatus.BAD_REQUEST.value())
-                    .message("카카오 로그인 실패")
-                    .data(null)
-                    .build()
-                    .toEntity(httpStatus);
-        }
-        else {
+            UserModel userInfo = userService.getKakaoId(code, request);
+
+            // userId를 세션에 저장
             session.setAttribute("userId", userInfo.getUserId());
 
-            return  CommonApiResponse.builder()
+            return CommonApiResponse.builder()
                     .statusCode(httpStatus.value())
-                    .message("커카오 로그인 성공")
+                    .message("SUCCESS")
                     .data(userInfo)
                     .build()
                     .toEntity(httpStatus);
+        } catch (UserNotFoundException e) {     // 회원가입이 필요한 경우
+            String userId = e.getMessage();
+
+            Map<String, String> data = new HashMap<String, String>();
+            data.put("userId", userId);
+
+            return CommonApiResponse.builder()
+                    .statusCode(HttpStatus.UNAUTHORIZED.value())
+                    .message("Registration required.")
+                    .data(data)
+                    .build()
+                    .toEntity(httpStatus);
+        } catch (HttpClientErrorException e) {      // 인가코드가 만료된 경우
+            e.printStackTrace();
+
+            return CommonApiResponse.builder()
+                    .statusCode(HttpStatus.BAD_REQUEST.value())
+                    .message("Kakao authorization code not found or expired.")
+                    .data(null)
+                    .build()
+                    .toEntity(httpStatus);
+        } catch (Exception e) {     // 서버 내부 오류
+            e.printStackTrace();
+            return CommonApiResponse.builder()
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .data(null)
+                    .message("An internal server error occurred. Please try again later.")
+                    .build().toEntity(httpStatus);
         }
     }
 

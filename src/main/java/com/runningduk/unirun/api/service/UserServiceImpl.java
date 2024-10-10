@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import com.runningduk.unirun.domain.model.KakaoLogoutModel;
 import com.runningduk.unirun.domain.repository.UserMapper;
 import com.runningduk.unirun.domain.model.UserModel;
+import com.runningduk.unirun.exceptions.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +44,7 @@ public class UserServiceImpl implements UserService {
     @Value("${kakao.client-secret}")
     private String kakaoClientSecret;
 
-    public UserModel getKakaoId(String code, HttpServletRequest request){
+    public UserModel getKakaoId(String code, HttpServletRequest request) throws UserNotFoundException {
         HttpSession session = request.getSession();
 
         // 1. 토큰 받기
@@ -51,20 +52,17 @@ public class UserServiceImpl implements UserService {
 
         // 2. userId
         String[] returnValues = getKakaoUserId(accessToken);
+        String userId = returnValues[0];
 
         System.out.println("accessToken = " + accessToken);
 
-        UserModel userModel = userMapper.selectUser(returnValues[0]);
+        UserModel userModel = userMapper.selectUser(userId);
         session.setAttribute("accessToken",accessToken);
-        if(userModel == null){
-            userModel = new UserModel();
-            userModel.setUserId(returnValues[0]);
-            userModel.setNickname(returnValues[1]);
-            System.out.println("미등록");
-        }else{
-            System.out.println("등록");
-            session.setAttribute("userId",userModel.getUserId());
+
+        if (userModel == null) {        // userId가 DB에 없는 경우 (회원가입 필요)
+            throw new UserNotFoundException(userId);
         }
+
         return userModel;
     }
 
