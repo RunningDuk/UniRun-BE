@@ -32,8 +32,9 @@ public class UserController {
     private final View error;
     HttpStatus httpStatus;
 
-    @RequestMapping(value = "/user/auth", method = RequestMethod.GET)
-    public ResponseEntity<CommonApiResponse> getKakaoProfile(@RequestParam(name="code") String code, HttpServletRequest request, HttpSession session) {
+    @RequestMapping(value = "/user/auth", method = RequestMethod.POST)
+    public ResponseEntity<CommonApiResponse> getKakaoProfile(@RequestBody Map<String, Object> requestData, HttpServletRequest request, HttpSession session) {
+        String code = (String) requestData.get("code");
         System.out.println("code ====>>>>"+code);
 
         UserModel userInfo = userService.getKakaoId(code,request);
