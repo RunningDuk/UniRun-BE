@@ -33,8 +33,7 @@ public class UserController {
     HttpStatus httpStatus;
 
     @RequestMapping(value = "/user/auth", method = RequestMethod.POST)
-    public ResponseEntity<CommonApiResponse> getKakaoProfile(@RequestBody Map<String, Object> requestData, HttpServletRequest request, HttpSession session) {
-        String code = (String) requestData.get("code");
+    public ResponseEntity<CommonApiResponse> getKakaoProfile(@RequestParam String code, HttpServletRequest request, HttpSession session) {
         System.out.println("code ====>>>>"+code);
 
         UserModel userInfo = userService.getKakaoId(code,request);

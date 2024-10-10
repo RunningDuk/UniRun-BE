@@ -37,7 +37,7 @@ springdoc:
 kakao:
   client-id: ${KAKAO_CLIENT_ID}  # 카카오 API Client ID 환경 변수로 설정
   client-secret: ${KAKAO_CLIENT_SECRET}  # 카카오 API Client Secret 환경 변수로 설정 (Jasypt로 암호화된 값이 아닌 시크릿에서 직접 사용)
-  redirect-uri: "http://localhost:8888/returnPage.jsp"
+  redirect-uri: ${REDIRECT_URI}
   logout-uri: https://kauth.kakao.com/oauth/logout
   logout-redirect-uri: http://localhost:8888/login.html
   authorization-grant-type: authorization_code
