@@ -1,6 +1,7 @@
 package com.runningduk.unirun.api.controller;
 import static org.springframework.http.HttpStatus.OK;
 
+import com.runningduk.unirun.api.request.UserPatchReq;
 import com.runningduk.unirun.api.response.CommonApiResponse;
 import com.runningduk.unirun.api.response.SaveResultModel;
 import com.runningduk.unirun.common.CommonResVO;
@@ -46,22 +47,20 @@ public class UserController {
             // userId를 세션에 저장
             session.setAttribute("userId", userInfo.getUserId());
 
+            if (!userInfo.isUnirunUser()) {     // 회원가입이 필요한 경우
+                return CommonApiResponse.builder()
+                        .statusCode(HttpStatus.UNAUTHORIZED.value())
+                        .message("Registration required.")
+                        .data(null)
+                        .build()
+                        .toEntity(httpStatus);
+            }
+
+            // 로그인 성공
             return CommonApiResponse.builder()
                     .statusCode(httpStatus.value())
                     .message("SUCCESS")
                     .data(userInfo)
-                    .build()
-                    .toEntity(httpStatus);
-        } catch (UserNotFoundException e) {     // 회원가입이 필요한 경우
-            String userId = e.getMessage();
-
-            Map<String, String> data = new HashMap<String, String>();
-            data.put("userId", userId);
-
-            return CommonApiResponse.builder()
-                    .statusCode(HttpStatus.UNAUTHORIZED.value())
-                    .message("Registration required.")
-                    .data(data)
                     .build()
                     .toEntity(httpStatus);
         } catch (HttpClientErrorException e) {      // 인가코드가 만료된 경우
@@ -81,6 +80,11 @@ public class UserController {
                     .message("An internal server error occurred. Please try again later.")
                     .build().toEntity(httpStatus);
         }
+    }
+
+    @RequestMapping(value = "/user/auth", method = RequestMethod.GET)
+    public String getCode(@RequestParam(name = "code") String code) {
+        return code;
     }
 
     @RequestMapping(value = "/user", method = RequestMethod.GET)
@@ -107,22 +111,27 @@ public class UserController {
         }
     }
 
-    @RequestMapping(value = "/user/register", method = RequestMethod.POST)
-    public ResponseEntity<CommonApiResponse> saveUser(@RequestBody UserModel userModel) {
+    @RequestMapping(value = "/user/register", method = RequestMethod.PATCH)
+    public ResponseEntity<CommonApiResponse> saveUser(@RequestBody UserPatchReq req, HttpSession session) {
         SaveResultModel saveResultModel = new SaveResultModel();
-        userModel.setNickname(userModel.getNickname());
 
-        int result = userService.insertUser(userModel);
+        String userId = (String) session.getAttribute("userId");
+
+        UserModel userModel = req.toModel();
+        userModel.setUserId(userId);
+
+        System.out.println("user model: " + userModel);
+
+        int result = userService.updateUser(userModel);
 
         if (result == 1) {
             return CommonApiResponse.builder()
                     .statusCode(HttpStatus.CREATED.value())
-                    .message("회원가입 성공")
-                    .data(result)
+                    .message("SUCCESS")
+                    .data(null)
                     .build()
                     .toEntity(httpStatus);
-        }
-        else {
+        } else {
             return  CommonApiResponse.builder()
                     .statusCode(HttpStatus.BAD_REQUEST.value())
                     .message("회원가입 실패")
@@ -159,25 +168,30 @@ public class UserController {
 
     }
 
-    @RequestMapping(value = "/user/update", method = RequestMethod.PUT)
-    public ResponseEntity<CommonApiResponse> updateUser(@RequestBody UserModel userModel) {
+    @RequestMapping(value = "/user/update", method = RequestMethod.PATCH)
+    public ResponseEntity<CommonApiResponse> updateUser(@RequestBody UserPatchReq req, HttpSession session) {
         SaveResultModel saveResultModel = new SaveResultModel();
 
+        String userId = (String) session.getAttribute("userId");
+
+        UserModel userModel = req.toModel();
+        userModel.setUserId(userId);
+
+        System.out.println("user model: " + userModel);
+
         int result = userService.updateUser(userModel);
+
         if (result == 1) {
-            httpStatus = HttpStatus.OK;
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
-                    .message("회원 수정 성공")
-                    .data(result)
+                    .statusCode(HttpStatus.CREATED.value())
+                    .message("SUCCESS")
+                    .data(null)
                     .build()
                     .toEntity(httpStatus);
-        }
-        else {
-            httpStatus = HttpStatus.BAD_REQUEST;
-            return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
-                    .message("회원 수정 실패")
+        } else {
+            return  CommonApiResponse.builder()
+                    .statusCode(HttpStatus.BAD_REQUEST.value())
+                    .message("회원가입 실패")
                     .data(result)
                     .build()
                     .toEntity(httpStatus);

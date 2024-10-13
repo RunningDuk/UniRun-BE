@@ -43,10 +43,10 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 
-        registry.addInterceptor(new LoginCheckInterceptor()) //LoginCheckInterceptor 등록
-                .order(1)
-                .addPathPatterns("/**")
-                .excludePathPatterns("/", "/user/auth", "/user/register", "/calendar/running-schedules/monthly", "/calendar/running-schedules/daily");
+//        registry.addInterceptor(new LoginCheckInterceptor()) //LoginCheckInterceptor 등록
+//                .order(1)
+//                .addPathPatterns("/**")
+//                .excludePathPatterns("/", "/user/auth", "/user/register", "/calendar/running-schedules/monthly", "/calendar/running-schedules/daily");
     }
 
 }

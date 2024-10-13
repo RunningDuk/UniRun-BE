@@ -3,6 +3,20 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTO Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.runningduk.unirun.domain.repository.UserMapper">
+    <!-- resultMap 설정 -->
+    <resultMap id="userResultMap" type="com.runningduk.unirun.domain.model.UserModel">
+        <result property="userId" column="user_id"/>
+        <result property="nickname" column="nickname"/>
+        <result property="userUniName" column="user_uni_name"/>
+        <result property="gender" column="gender"/>
+        <result property="birthYear" column="birth_year"/>
+        <result property="height" column="height"/>
+        <result property="weight" column="weight"/>
+        <result property="goal" column="goal"/>
+        <result property="walletAddress" column="wallet_address"/>
+        <result property="isUnirunUser" column="is_unirun_user"/> <!-- 매핑 설정 -->
+    </resultMap>
+
     <select id="selectUser" resultType="com.runningduk.unirun.domain.model.UserModel" parameterType="java.lang.String">
         SELECT * FROM user where user_id = #{userId}
     </select>
@@ -20,7 +34,8 @@
             birth_year = #{birthYear},
             gender = #{gender},
             user_uni_name = #{userUniName},
-            wallet_address = #{walletAddress}
+            wallet_address = #{walletAddress},
+            is_unirun_user = #{isUnirunUser}
         where user_id = #{userId}
     </update>
 

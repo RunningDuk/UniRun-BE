@@ -1,9 +1,15 @@
 package com.runningduk.unirun.domain.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.*;
 
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+@Setter
+@Getter
 public class UserModel {
     @Schema(description = "사용자 ID")
     private String userId;
@@ -23,4 +29,6 @@ public class UserModel {
     private String goal;
     @Schema(description = "지갑 주소")
     private String walletAddress;
+    @Schema(description = "UniRun 사용자 여부")
+    private boolean isUnirunUser;
 }
