@@ -22,7 +22,10 @@ spring:
     hibernate:
       ddl-auto: update  # ddl-auto 설정 추가
   session:
+    timeout: 2592000
     store-type: redis
+    redis:
+      flush-mode: on-save
   redis:
     host: redis-19960.c340.ap-northeast-2-1.ec2.redns.redis-cloud.com
     port: 19960
