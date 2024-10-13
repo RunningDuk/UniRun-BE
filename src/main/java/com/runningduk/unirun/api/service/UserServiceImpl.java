@@ -59,8 +59,13 @@ public class UserServiceImpl implements UserService {
         UserModel userModel = userMapper.selectUser(userId);
         session.setAttribute("accessToken",accessToken);
 
-        if (userModel == null) {        // userId가 DB에 없는 경우 (회원가입 필요)
-            throw new UserNotFoundException(userId);
+        if (userModel == null) {
+            userModel = UserModel.builder()
+                    .userId(userId)
+                    .gender("F")
+                    .build();
+
+            int result = insertUser(userModel);
         }
 
         return userModel;
