@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "user")
@@ -36,4 +37,8 @@ public class User {
 
     @Column(name="wallet_address")
     private String walletAddress;
+
+    @Column(name="is_unirun_user", columnDefinition = "TINYINT(1)")
+    @ColumnDefault("0")
+    private boolean isUnirunUser;
 }
