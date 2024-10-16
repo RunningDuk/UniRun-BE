@@ -1,5 +1,6 @@
 package com.runningduk.unirun.api.controller;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 import com.runningduk.unirun.api.request.UserPatchReq;
 import com.runningduk.unirun.api.response.CommonApiResponse;
@@ -50,6 +51,7 @@ public class UserController {
 
             if (!userInfo.isUnirunUser()) {     // 회원가입이 필요한 경우
                 log.warn("Registration required for user ID: {}", userInfo.getUserId());  // 회원가입 필요 로그
+                httpStatus = httpStatus.UNAUTHORIZED;
                 return CommonApiResponse.builder()
                         .statusCode(HttpStatus.UNAUTHORIZED.value())
                         .message("Registration required.")
