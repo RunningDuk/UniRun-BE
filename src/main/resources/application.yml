@@ -39,10 +39,10 @@ springdoc:
     path: /swagger-ui
 kakao:
   client-id: ${KAKAO_CLIENT_ID}  # 카카오 API Client ID 환경 변수로 설정
-  client-secret: ${KAKAO_CLIENT_SECRET}  # 카카오 API Client Secret 환경 변수로 설정 (Jasypt로 암호화된 값이 아닌 시크릿에서 직접 사용)
+  client-secret: ${KAKAO_CLIENT_SECRET}
   redirect-uri: ${REDIRECT_URI}
   logout-uri: https://kauth.kakao.com/oauth/logout
-  logout-redirect-uri: http://localhost:8888/login.html
+#  logout-redirect-uri: ${LOGOUT_REDIRECT_URI}
   authorization-grant-type: authorization_code
   authorization-uri: https://kauth.kakao.com/oauth/authorize
   token-uri: https://kauth.kakao.com/oauth/token
