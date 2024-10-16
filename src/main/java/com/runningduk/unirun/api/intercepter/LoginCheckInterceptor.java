@@ -27,14 +27,14 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
             response.setStatus(HttpServletResponse.SC_OK);
 
             CommonApiResponse<Object> responseBody = CommonApiResponse.builder()
-                    .statusCode(HttpStatus.UNAUTHORIZED.value())
+                    .status(HttpStatus.UNAUTHORIZED.value())
                     .message("Access Denied: Login required.")
                     .data(null)
                     .build();
 
             // 응답을 JSON 형식으로 변환하여 출력
             PrintWriter out = response.getWriter();
-            out.print("{\"statusCode\":" + responseBody.getStatusCode() + ","
+            out.print("{\"statusCode\":" + responseBody.getStatus() + ","
                     + "\"message\":\"" + responseBody.getMessage() + "\","
                     + "\"data\":null,"
                     + "\"sendTime\":\"" + responseBody.getSendTime() + "\"}");

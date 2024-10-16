@@ -1,31 +1,21 @@
 package com.runningduk.unirun.api.controller;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 import com.runningduk.unirun.api.request.UserPatchReq;
 import com.runningduk.unirun.api.response.CommonApiResponse;
 import com.runningduk.unirun.api.response.SaveResultModel;
-import com.runningduk.unirun.common.CommonResVO;
-import com.runningduk.unirun.domain.entity.User;
 import com.runningduk.unirun.domain.model.KakaoLogoutModel;
 import com.runningduk.unirun.domain.model.UserModel;
 import com.runningduk.unirun.api.service.UserService;
-import com.runningduk.unirun.exceptions.UserNotFoundException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.jdbc.Null;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.View;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -51,9 +41,8 @@ public class UserController {
 
             if (!userInfo.isUnirunUser()) {     // 회원가입이 필요한 경우
                 log.warn("Registration required for user ID: {}", userInfo.getUserId());  // 회원가입 필요 로그
-                httpStatus = httpStatus.UNAUTHORIZED;
                 return CommonApiResponse.builder()
-                        .statusCode(HttpStatus.UNAUTHORIZED.value())
+                        .status(HttpStatus.UNAUTHORIZED.value())
                         .message("Registration required.")
                         .data(null)
                         .build()
@@ -62,7 +51,7 @@ public class UserController {
 
             log.info("Login successful for user ID: {}", userInfo.getUserId());  // 로그인 성공 로그
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .status(httpStatus.value())
                     .message("SUCCESS")
                     .data(userInfo)
                     .build()
@@ -70,7 +59,7 @@ public class UserController {
         } catch (HttpClientErrorException e) {      // 인가코드가 만료된 경우
             log.error("Kakao authorization code expired or not found", e);  // 인가코드 오류 로그
             return CommonApiResponse.builder()
-                    .statusCode(HttpStatus.BAD_REQUEST.value())
+                    .status(HttpStatus.BAD_REQUEST.value())
                     .message("Kakao authorization code not found or expired.")
                     .data(null)
                     .build()
@@ -78,7 +67,7 @@ public class UserController {
         } catch (Exception e) {     // 서버 내부 오류
             log.error("Internal server error occurred", e);  // 서버 오류 로그
             return CommonApiResponse.builder()
-                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .data(null)
                     .message("An internal server error occurred. Please try again later.")
                     .build().toEntity(httpStatus);
@@ -102,7 +91,7 @@ public class UserController {
         if (userModel != null) {
             log.info("User found for user ID: {}", userId);  // 사용자 찾음 로그
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .status(httpStatus.value())
                     .message("success")
                     .data(userModel)
                     .build()
@@ -110,7 +99,7 @@ public class UserController {
         } else {
             log.warn("User not found for user ID: {}", userId);  // 사용자 없음 로그
             return CommonApiResponse.builder()
-                    .statusCode(HttpStatus.NOT_FOUND.value())
+                    .status(HttpStatus.NOT_FOUND.value())
                     .message("사용자 없음")
                     .data(null)
                     .build()
@@ -134,7 +123,7 @@ public class UserController {
         if (result == 1) {
             log.info("User registration successful for user ID: {}", userId);  // 회원가입 성공 로그
             return CommonApiResponse.builder()
-                    .statusCode(HttpStatus.CREATED.value())
+                    .status(HttpStatus.CREATED.value())
                     .message("SUCCESS")
                     .data(null)
                     .build()
@@ -142,7 +131,7 @@ public class UserController {
         } else {
             log.error("User registration failed for user ID: {}", userId);  // 회원가입 실패 로그
             return CommonApiResponse.builder()
-                    .statusCode(HttpStatus.BAD_REQUEST.value())
+                    .status(HttpStatus.BAD_REQUEST.value())
                     .message("회원가입 실패")
                     .data(result)
                     .build()
@@ -160,7 +149,7 @@ public class UserController {
             log.info("Logout successful");  // 로그아웃 성공 로그
 
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .status(httpStatus.value())
                     .message("success")
                     .data(kakaoLogoutModel)
                     .build()
@@ -169,7 +158,7 @@ public class UserController {
         } catch (Exception e) {
             log.error("Logout failed", e);  // 로그아웃 실패 로그
             return CommonApiResponse.builder()
-                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .message("로그아웃 실패")
                     .data(null)
                     .build()
@@ -189,7 +178,7 @@ public class UserController {
             log.info("User deletion successful for user ID: {}", userId);  // 사용자 삭제 성공 로그
             httpStatus = HttpStatus.OK;
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .status(httpStatus.value())
                     .message("회원 탈퇴 성공")
                     .data(result)
                     .build()
@@ -198,7 +187,7 @@ public class UserController {
             log.error("User deletion failed for user ID: {}", userId);  // 사용자 삭제 실패 로그
             httpStatus = HttpStatus.BAD_REQUEST;
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .status(httpStatus.value())
                     .message("회원 탈퇴 실패")
                     .data(null)
                     .build()

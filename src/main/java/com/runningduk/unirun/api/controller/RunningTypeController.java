@@ -19,9 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -66,7 +64,7 @@ public class RunningTypeController {
             log.info("Successfully fetched running types for user {}", userId);
 
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .status(httpStatus.value())
                     .message("SUCCESS")
                     .data(typeNames)
                     .build().toEntity(httpStatus);
@@ -74,7 +72,7 @@ public class RunningTypeController {
             log.error("Failed to fetch running types for user {}", userId, e);
 
             return CommonApiResponse.builder()
-                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .message("러닝 타입 조회에 실패하였습니다.")
                     .data(null)
                     .build().toEntity(httpStatus);
@@ -94,7 +92,7 @@ public class RunningTypeController {
             log.info("Successfully updated running name for runningDataId {}", runningDataId);
 
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .status(httpStatus.value())
                     .data(null)
                     .message("SUCCESS")
                     .build().toEntity(httpStatus);
@@ -102,7 +100,7 @@ public class RunningTypeController {
             log.error("Failed to update running name for runningDataId {}", runningDataId, e);
 
             return CommonApiResponse.builder()
-                    .statusCode(HttpStatus.NOT_FOUND.value())
+                    .status(HttpStatus.NOT_FOUND.value())
                     .data(null)
                     .message("러닝 이름 저장에 실패하였습니다.")
                     .build().toEntity(httpStatus);
@@ -110,7 +108,7 @@ public class RunningTypeController {
             log.error("Failed to add running name", e);
 
             return CommonApiResponse.builder()
-                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .data(null)
                     .message("An internal server error occurred. Please try again later.")
                     .build().toEntity(httpStatus);

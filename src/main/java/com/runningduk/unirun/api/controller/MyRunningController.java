@@ -3,7 +3,6 @@ package com.runningduk.unirun.api.controller;
 import com.runningduk.unirun.api.response.CommonApiResponse;
 import com.runningduk.unirun.api.service.RunningDataService;
 import com.runningduk.unirun.domain.entity.RunningData;
-import com.runningduk.unirun.domain.entity.RunningSchedule;
 import com.runningduk.unirun.exceptions.NoSuchRunningDataException;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -38,7 +34,7 @@ public class MyRunningController {
             log.info("Successfully fetched my running data list for user {}", userId);
 
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .status(httpStatus.value())
                     .data(myRunningDataList)
                     .message("SUCCESS")
                     .build().toEntity(httpStatus);
@@ -46,7 +42,7 @@ public class MyRunningController {
             log.error("Failed to fetch my running data list for user {}", userId, e);
 
             return CommonApiResponse.builder()
-                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .data(null)
                     .message("나의 러닝 기록 조회에 실패하였습니다.")
                     .build().toEntity(httpStatus);
@@ -62,7 +58,7 @@ public class MyRunningController {
 
             if (runningData.getUserId().equals(userId)) {
                 return CommonApiResponse.builder()
-                        .statusCode(HttpStatus.UNAUTHORIZED.value())
+                        .status(HttpStatus.UNAUTHORIZED.value())
                         .data(null)
                         .message("You do not have permission to delete this running data.")
                         .build().toEntity(httpStatus);
@@ -73,7 +69,7 @@ public class MyRunningController {
             log.info("Successfully deleted running data list for runningDataId {}", runningDataId);
 
             return CommonApiResponse.builder()
-                    .statusCode(httpStatus.value())
+                    .status(httpStatus.value())
                     .data(null)
                     .message("SUCCESS")
                     .build().toEntity(httpStatus);
@@ -81,7 +77,7 @@ public class MyRunningController {
             log.error("Failed to delete running data for runningDataId {}", runningDataId);
 
             return CommonApiResponse.builder()
-                    .statusCode(HttpStatus.NOT_FOUND.value())
+                    .status(HttpStatus.NOT_FOUND.value())
                     .data(null)
                     .message("runningDataId " + runningDataId + "에 해당하는 러닝 기록이 없습니다.")
                     .build().toEntity(httpStatus);
@@ -89,7 +85,7 @@ public class MyRunningController {
             log.error("Failed to add running name", e);
 
             return CommonApiResponse.builder()
-                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .data(null)
                     .message("An internal server error occurred. Please try again later.")
                     .build().toEntity(httpStatus);

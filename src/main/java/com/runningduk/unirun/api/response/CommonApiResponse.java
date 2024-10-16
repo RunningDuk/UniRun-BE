@@ -13,7 +13,7 @@ import java.time.ZonedDateTime;
 @AllArgsConstructor
 @Builder
 public class CommonApiResponse<T> {
-    private int statusCode;
+    private int status;
     private final String message;
     private final T data;
     private final ZonedDateTime sendTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
