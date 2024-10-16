@@ -40,14 +40,16 @@ public class UserController {
     public ResponseEntity<CommonApiResponse> getKakaoProfile(@RequestBody Map<String, Object> requestData, HttpServletRequest request, HttpSession session) {
         try {
             String code = (String) requestData.get("code");
-            System.out.println("code ====>>>>" + code);
+            log.info("Kakao authorization code received: {}", code);  // 인가 코드 로그
 
             UserModel userInfo = userService.getKakaoId(code, request);
 
             // userId를 세션에 저장
             session.setAttribute("userId", userInfo.getUserId());
+            log.info("User ID {} saved in session", userInfo.getUserId());  // 세션에 저장된 userId 로그
 
             if (!userInfo.isUnirunUser()) {     // 회원가입이 필요한 경우
+                log.warn("Registration required for user ID: {}", userInfo.getUserId());  // 회원가입 필요 로그
                 return CommonApiResponse.builder()
                         .statusCode(HttpStatus.UNAUTHORIZED.value())
                         .message("Registration required.")
@@ -56,7 +58,7 @@ public class UserController {
                         .toEntity(httpStatus);
             }
 
-            // 로그인 성공
+            log.info("Login successful for user ID: {}", userInfo.getUserId());  // 로그인 성공 로그
             return CommonApiResponse.builder()
                     .statusCode(httpStatus.value())
                     .message("SUCCESS")
@@ -64,8 +66,7 @@ public class UserController {
                     .build()
                     .toEntity(httpStatus);
         } catch (HttpClientErrorException e) {      // 인가코드가 만료된 경우
-            e.printStackTrace();
-
+            log.error("Kakao authorization code expired or not found", e);  // 인가코드 오류 로그
             return CommonApiResponse.builder()
                     .statusCode(HttpStatus.BAD_REQUEST.value())
                     .message("Kakao authorization code not found or expired.")
@@ -73,7 +74,7 @@ public class UserController {
                     .build()
                     .toEntity(httpStatus);
         } catch (Exception e) {     // 서버 내부 오류
-            e.printStackTrace();
+            log.error("Internal server error occurred", e);  // 서버 오류 로그
             return CommonApiResponse.builder()
                     .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .data(null)
@@ -84,6 +85,7 @@ public class UserController {
 
     @RequestMapping(value = "/user/auth", method = RequestMethod.GET)
     public String getCode(@RequestParam(name = "code") String code) {
+        log.info("Kakao authorization code: {}", code);  // 인가 코드 로그
         return code;
     }
 
@@ -91,18 +93,21 @@ public class UserController {
     public ResponseEntity<CommonApiResponse> selectUser(HttpServletRequest request) {
         HttpSession session = request.getSession();
         String userId = (String) session.getAttribute("userId");
+        log.info("User ID {} retrieved from session", userId);  // 세션에서 userId 로그
+
         UserModel userModel = userService.selectUser(userId);
 
         if (userModel != null) {
+            log.info("User found for user ID: {}", userId);  // 사용자 찾음 로그
             return CommonApiResponse.builder()
                     .statusCode(httpStatus.value())
                     .message("success")
                     .data(userModel)
                     .build()
                     .toEntity(httpStatus);
-        }
-        else {
-            return  CommonApiResponse.builder()
+        } else {
+            log.warn("User not found for user ID: {}", userId);  // 사용자 없음 로그
+            return CommonApiResponse.builder()
                     .statusCode(HttpStatus.NOT_FOUND.value())
                     .message("사용자 없음")
                     .data(null)
@@ -114,17 +119,18 @@ public class UserController {
     @RequestMapping(value = "/user/register", method = RequestMethod.PATCH)
     public ResponseEntity<CommonApiResponse> saveUser(@RequestBody UserPatchReq req, HttpSession session) {
         SaveResultModel saveResultModel = new SaveResultModel();
-
         String userId = (String) session.getAttribute("userId");
+        log.info("User ID {} retrieved from session for registration", userId);  // 회원가입 세션 로그
 
         UserModel userModel = req.toModel();
         userModel.setUserId(userId);
 
-        System.out.println("user model: " + userModel);
+        log.info("UserModel: {}", userModel);  // 회원가입 모델 로그
 
         int result = userService.updateUser(userModel);
 
         if (result == 1) {
+            log.info("User registration successful for user ID: {}", userId);  // 회원가입 성공 로그
             return CommonApiResponse.builder()
                     .statusCode(HttpStatus.CREATED.value())
                     .message("SUCCESS")
@@ -132,7 +138,8 @@ public class UserController {
                     .build()
                     .toEntity(httpStatus);
         } else {
-            return  CommonApiResponse.builder()
+            log.error("User registration failed for user ID: {}", userId);  // 회원가입 실패 로그
+            return CommonApiResponse.builder()
                     .statusCode(HttpStatus.BAD_REQUEST.value())
                     .message("회원가입 실패")
                     .data(result)
@@ -141,14 +148,14 @@ public class UserController {
         }
     }
 
-    @RequestMapping(value="/user/logout", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/user/logout", method = RequestMethod.DELETE)
     public ResponseEntity<CommonApiResponse> logout(HttpServletRequest request) {
-        //서비스 실행 - 세션에서 access token 가져와서 카카오 접속해서 토컨 만료, http session도 만료
         HttpSession session = request.getSession();
+        log.info("Logging out user ID: {}", session.getAttribute("userId"));  // 로그아웃 로그
         try {
             session.invalidate();
-            KakaoLogoutModel kakaoLogoutModel = new KakaoLogoutModel();
-            kakaoLogoutModel = userService.getKakaLogOutInfo();
+            KakaoLogoutModel kakaoLogoutModel = userService.getKakaLogOutInfo();
+            log.info("Logout successful");  // 로그아웃 성공 로그
 
             return CommonApiResponse.builder()
                     .statusCode(httpStatus.value())
@@ -157,42 +164,12 @@ public class UserController {
                     .build()
                     .toEntity(httpStatus);
 
-        }catch (Exception e) {
+        } catch (Exception e) {
+            log.error("Logout failed", e);  // 로그아웃 실패 로그
             return CommonApiResponse.builder()
                     .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .message("로그아웃 실패")
                     .data(null)
-                    .build()
-                    .toEntity(httpStatus);
-        }
-
-    }
-
-    @RequestMapping(value = "/user/update", method = RequestMethod.PATCH)
-    public ResponseEntity<CommonApiResponse> updateUser(@RequestBody UserPatchReq req, HttpSession session) {
-        SaveResultModel saveResultModel = new SaveResultModel();
-
-        String userId = (String) session.getAttribute("userId");
-
-        UserModel userModel = req.toModel();
-        userModel.setUserId(userId);
-
-        System.out.println("user model: " + userModel);
-
-        int result = userService.updateUser(userModel);
-
-        if (result == 1) {
-            return CommonApiResponse.builder()
-                    .statusCode(HttpStatus.CREATED.value())
-                    .message("SUCCESS")
-                    .data(null)
-                    .build()
-                    .toEntity(httpStatus);
-        } else {
-            return  CommonApiResponse.builder()
-                    .statusCode(HttpStatus.BAD_REQUEST.value())
-                    .message("회원가입 실패")
-                    .data(result)
                     .build()
                     .toEntity(httpStatus);
         }
@@ -202,11 +179,12 @@ public class UserController {
     public ResponseEntity<CommonApiResponse> deleteUser(HttpServletRequest request) {
         HttpSession session = request.getSession();
         String userId = (String) session.getAttribute("userId");
+        log.info("Deleting user with ID: {}", userId);  // 사용자 삭제 로그
 
-        log.info("userId ={}",userId);
         int result = userService.deleteUser(userId);
 
         if (result == 1) {
+            log.info("User deletion successful for user ID: {}", userId);  // 사용자 삭제 성공 로그
             httpStatus = HttpStatus.OK;
             return CommonApiResponse.builder()
                     .statusCode(httpStatus.value())
@@ -214,8 +192,8 @@ public class UserController {
                     .data(result)
                     .build()
                     .toEntity(httpStatus);
-        }
-        else {
+        } else {
+            log.error("User deletion failed for user ID: {}", userId);  // 사용자 삭제 실패 로그
             httpStatus = HttpStatus.BAD_REQUEST;
             return CommonApiResponse.builder()
                     .statusCode(httpStatus.value())
@@ -224,7 +202,5 @@ public class UserController {
                     .build()
                     .toEntity(httpStatus);
         }
-
     }
 }
-
