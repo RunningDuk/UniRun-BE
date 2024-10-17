@@ -2,7 +2,6 @@ package com.runningduk.unirun.config;
 
 import com.runningduk.unirun.api.controller.GpsController;
 import com.runningduk.unirun.api.service.GPSService;
-import com.runningduk.unirun.api.intercepter.HttpSessionHandshakeIntercepter;
 import com.runningduk.unirun.api.service.GpsScheduler;
 import com.runningduk.unirun.api.service.RunningDataService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,6 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(gpsController(), "/running")
-                .setAllowedOrigins("*")
-                .addInterceptors(new HttpSessionHandshakeIntercepter());
+                .setAllowedOrigins("*");
     }
 }
