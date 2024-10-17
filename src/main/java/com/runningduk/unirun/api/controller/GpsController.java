@@ -1,12 +1,8 @@
 package com.runningduk.unirun.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.runningduk.unirun.common.Day;
+import com.runningduk.unirun.api.message.*;
 import com.runningduk.unirun.common.RunningStatus;
-import com.runningduk.unirun.api.message.LocationMessage;
-import com.runningduk.unirun.api.message.SummeryMessage;
-import com.runningduk.unirun.api.message.StatusMessage;
-import com.runningduk.unirun.api.message.DistanceMessage;
 import com.runningduk.unirun.api.service.GPSService;
 import com.runningduk.unirun.api.service.RunningDataService;
 import com.runningduk.unirun.domain.entity.Gps;
@@ -14,6 +10,7 @@ import com.runningduk.unirun.domain.entity.RunningData;
 import com.runningduk.unirun.api.service.GpsScheduler;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -26,13 +23,13 @@ import java.io.IOException;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 public class GpsController extends TextWebSocketHandler {
     // logger
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -60,8 +57,9 @@ public class GpsController extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         super.afterConnectionEstablished(session);
+
         session.getAttributes().put("locationData", new HashMap<String, Double>()); // locationData 맵 초기화
-        logger.info("WebSocket connection established: {}", session.getId());
+        logger.info("WebSocket connection established: sessionId = {}, locationData initialized", session.getId());
     }
 
     // 클라이언트로부터 메시지를 받을 때 호출
@@ -76,11 +74,7 @@ public class GpsController extends TextWebSocketHandler {
         String messageType = (String) receivedData.get("type");
         Map<String, Object> payloadData = (Map<String, Object>) receivedData.get("payload");
 
-        HttpSession httpSession = (HttpSession) socketSession.getAttributes().get("http_session");
-        String userId = (String) httpSession.getAttribute("userId");
-
-        socketSession.getAttributes().put("userId", userId);
-        logger.info("Processing message of type: {}", messageType);
+        logger.info("Message type: {}, Payload: {}", messageType, payloadData);
 
         switch (messageType) {
             case "status":
@@ -137,7 +131,7 @@ public class GpsController extends TextWebSocketHandler {
             String receivedTotalTime = (String) receivedData.get("totalRunningTime");
             totalTime = Time.valueOf(receivedTotalTime);
 
-            socketSession.sendMessage(new TextMessage("REQUEST_GPS_DATA"));
+            processFinish(socketSession);
         }
         logger.info("Processed status data: {}", statusReq);
     }
@@ -147,11 +141,8 @@ public class GpsController extends TextWebSocketHandler {
         logger.info("Starting running session for session: {}", socketSession.getId());
         Date date = new Date(System.currentTimeMillis());
 
-        String userId = (String) socketSession.getAttributes().get("userId");   // HttpSession에서 userId 가져오기
-
         RunningData runningData = RunningData.builder()
                 .runningDataId(0)
-                .userId(userId)
                 .cal(0)
                 .totalTime(new Time(System.currentTimeMillis()))
                 .totalKm(0)
@@ -160,11 +151,12 @@ public class GpsController extends TextWebSocketHandler {
                 .build();
 
         int runningDataId = runningDataService.saveRunningData(runningData);
+        logger.info("Running data saved: runningDataId = {}, sessionId = {}", runningDataId, socketSession.getId());
+
         socketSession.getAttributes().put("runningDataId", runningDataId);   // 세션에 RunningDataID 저장
 
         gpsScheduler.addSession(socketSession.getId(), socketSession);  // GpsScheduler에 세션 추가
         gpsScheduler.startScheduler();
-        logger.info("Running session started for session: {}", socketSession.getId());
     }
 
     //    Scheduler 시작
@@ -182,23 +174,17 @@ public class GpsController extends TextWebSocketHandler {
 
     // 러닝 종료 상태 프로세스
     private void processFinish(WebSocketSession socketSession) throws IOException, IllegalAccessException {
-        logger.info("Finishing running session for session: {}", socketSession.getId());
-
         // WebSocket Session에서 runningDataId와 userId 값 가져오기
         int runningDataId = (int) socketSession.getAttributes().get("runningDataId");
-        String userId = (String) socketSession.getAttributes().get("userId");
+
+        logger.info("Finished running session for runningDataId: {}", runningDataId);
 
         // WebSocket Session에서 distance 값 가져오기
         Map<String, Double> locationData = (Map<String, Double>) socketSession.getAttributes().get("locationData");
         double distance = locationData.get("distance");
 
-        // 총 러닝 시간과 소모 칼로리 계산
-        double cal = runningDataService.calculateCaloriesBurned(totalTime, distance, userId);
-
         RunningData runningData = RunningData.builder()
                 .runningDataId(runningDataId)
-                .userId(userId)
-                .cal(cal)
                 .totalTime(totalTime)
                 .totalKm(distance)
                 .runningName(new Date(System.currentTimeMillis()).toString())
@@ -209,10 +195,7 @@ public class GpsController extends TextWebSocketHandler {
         runningDataService.saveRunningData(runningData);
 
         // FE에 Date, Time, Distance, Cal 정보 넘기기
-        responseWithRunningSummary(socketSession, runningData);
-
-        // 세션 종료
-        socketSession.close();
+        requestWSEnd(socketSession, runningData);
 
         logger.info("Running session finished and closed for session: {}", socketSession.getId());
     }
@@ -220,12 +203,10 @@ public class GpsController extends TextWebSocketHandler {
     // Gps 데이터 저장 및 거리 갱신
     private Map<String, Double> processLocationData(WebSocketSession socketSession, LocationMessage runningLocationReq) {
         int runningDataId = (int) socketSession.getAttributes().get("runningDataId");
-        String userId = (String) socketSession.getAttributes().get("userId");
 
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         Gps gps = Gps.builder()
                 .gpsId(0)
-                .userId(userId)
                 .time(timestamp)
                 .latitude(runningLocationReq.getLatitude())
                 .longitude(runningLocationReq.getLongitude())
@@ -238,7 +219,8 @@ public class GpsController extends TextWebSocketHandler {
         locationData = gpsService.updateLocationData(locationData, runningLocationReq.getLatitude(), runningLocationReq.getLongitude());
         socketSession.getAttributes().put("locationData", locationData);
 
-        logger.info("Processed location data for user {}, runningDataId {}, latitude {}, longitude {}", userId, runningDataId, runningLocationReq.getLatitude(), runningLocationReq.getLongitude());
+        logger.info("Location data processed: latitude = {}, longitude = {}, sessionId = {}", runningLocationReq.getLatitude(), runningLocationReq.getLongitude(), socketSession.getId());
+        logger.info("Updated location data: {}", locationData);
 
         return locationData;
     }
@@ -247,26 +229,36 @@ public class GpsController extends TextWebSocketHandler {
     private void responseWithDistance(WebSocketSession socketSession) throws IOException {
         Map<String, Double> locationData = (Map<String, Double>) socketSession.getAttributes().get("locationData");
         double distance = locationData.get("distance");
-        DistanceMessage distanceRes = DistanceMessage.builder()
-                .totalDistance(distance)
+
+        Map data = new HashMap();
+        data.put("totalDistance", distance);
+
+        CommonMessage commonMessage = CommonMessage.builder()
+                .type("distance")
+                .payload(distance)
                 .build();
-        String responsePayload = objectMapper.writeValueAsString(distanceRes);
+
+        String responsePayload = objectMapper.writeValueAsString(commonMessage);
         socketSession.sendMessage(new TextMessage(responsePayload));
 
-        logger.info("Responded with distance {} for session {}", distance, socketSession.getId());
+        logger.info("Responded with distance = {} for session: {}", distance, socketSession.getId());
     }
 
     // 러닝 종료 화면 데이터 Response로 넘기기
-    private void responseWithRunningSummary(WebSocketSession socketSession, RunningData runningData) throws IllegalAccessException, IOException {
+    private void requestWSEnd(WebSocketSession socketSession, RunningData runningData) throws IllegalAccessException, IOException {
+        logger.info("Sent running end request to sessionId: {}, runningDataId: {}", socketSession.getId(), runningData.getRunningDataId());
+
         int runningDataId = (int) socketSession.getAttributes().get("runningDataId");
 
-        SummeryMessage summeryMessage = SummeryMessage.builder()
-                .distance(runningData.getTotalKm())
-                .cal(runningData.getCal())
-                .runningDataId(runningDataId)
+        Map data = new HashMap();
+        data.put("runnginDataId", runningDataId);
+
+        CommonMessage commonMessage = CommonMessage.builder()
+                .type("END")
+                .payload(data)
                 .build();
 
-        String responsePayload = objectMapper.writeValueAsString(summeryMessage);
+        String responsePayload = objectMapper.writeValueAsString(commonMessage);
         socketSession.sendMessage(new TextMessage(responsePayload));
 
         logger.info("Responded with running summary for session {}", socketSession.getId());
