@@ -1,5 +1,7 @@
 package com.runningduk.unirun.api.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.runningduk.unirun.api.message.CommonMessage;
 import com.runningduk.unirun.exceptions.GPSException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
@@ -79,9 +81,18 @@ public class GpsScheduler {
 
 //    @Scheduled(fixedRate = 15000)   // 15초마다 GPS 데이터 요청
     public void fetchGps() throws GPSException {
+        ObjectMapper objectMapper = new ObjectMapper();
+
         for (WebSocketSession session : sessions.values()) {
             try {
-                session.sendMessage(new TextMessage("REQUEST_GPS_DATA"));
+                CommonMessage commonMessage = CommonMessage.builder()
+                                .type("REQUEST_GPS")
+                                .payload(null)
+                                .build();
+
+                String jsonMessage = objectMapper.writeValueAsString(commonMessage);
+
+                session.sendMessage(new TextMessage(jsonMessage));
             } catch (IOException e) {
                 e.printStackTrace();
                 throw new GPSException("fetch GPS error");

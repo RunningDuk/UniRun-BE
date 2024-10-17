@@ -6,7 +6,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LocationMessage {
+public class LocationMessage {  // 프론트에서 받는 위치 정보
     private Double latitude;
     private Double longitude;
 }

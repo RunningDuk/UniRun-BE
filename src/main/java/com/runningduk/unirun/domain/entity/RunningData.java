@@ -13,6 +13,7 @@ import java.sql.Time;
 @Setter
 @Builder
 @NoArgsConstructor
+@ToString
 @AllArgsConstructor
 public class RunningData {
     @Id

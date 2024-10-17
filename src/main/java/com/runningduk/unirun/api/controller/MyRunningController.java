@@ -1,6 +1,7 @@
 package com.runningduk.unirun.api.controller;
 
 import com.runningduk.unirun.api.response.CommonApiResponse;
+import com.runningduk.unirun.api.service.GPSService;
 import com.runningduk.unirun.api.service.RunningDataService;
 import com.runningduk.unirun.domain.entity.RunningData;
 import com.runningduk.unirun.exceptions.NoSuchRunningDataException;
@@ -24,7 +25,7 @@ public class MyRunningController {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @GetMapping
+    @GetMapping("/runnings")
     public ResponseEntity<CommonApiResponse> getMyRunningDataList(HttpSession httpSession) {
         String userId = null;
         try {
@@ -45,6 +46,51 @@ public class MyRunningController {
                     .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .data(null)
                     .message("나의 러닝 기록 조회에 실패하였습니다.")
+                    .build().toEntity(httpStatus);
+        }
+    }
+
+    @GetMapping("/running/{runningDataId}")
+    public ResponseEntity<CommonApiResponse> getRunningData(@PathVariable(name="runningDataId") int runningDataId, HttpSession session) {
+        try {
+            String userId = (String) session.getAttribute("userId");
+
+            RunningData runningData = runningDataService.getRunningDataById(runningDataId);
+            log.info("runningData: {}", runningData);
+
+            if (runningData.getUserId() == null || runningData.getUserId().isBlank() || runningData.getUserId().isEmpty()) {
+                log.info("running data user id is null");
+                double cal = runningDataService.calculateCaloriesBurned(runningData.getTotalTime(),
+                        runningData.getTotalKm(),
+                        userId);
+
+                runningData.setCal(cal);
+                runningData.setUserId(userId);
+
+                runningDataService.saveRunningData(runningData);
+            }
+
+            log.info("Success to get running data for id {} : {}", runningData.getRunningDataId(), runningData);
+
+            return CommonApiResponse.builder()
+                    .status(httpStatus.value())
+                    .data(runningData)
+                    .message("SUCCESS")
+                    .build().toEntity(httpStatus);
+        } catch (NoSuchRunningDataException e) {
+            log.error("Failed to get running data", e);
+            return CommonApiResponse.builder()
+                    .status(HttpStatus.NOT_FOUND.value())
+                    .data(null)
+                    .message(e.getMessage())
+                    .build().toEntity(httpStatus);
+        } catch (Exception e) {
+            log.error("Failed to get running data", e);
+
+            return CommonApiResponse.builder()
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .data(null)
+                    .message("An internal server error occurred. Please try again later.")
                     .build().toEntity(httpStatus);
         }
     }
@@ -79,7 +125,7 @@ public class MyRunningController {
             return CommonApiResponse.builder()
                     .status(HttpStatus.NOT_FOUND.value())
                     .data(null)
-                    .message("runningDataId " + runningDataId + "에 해당하는 러닝 기록이 없습니다.")
+                    .message(e.getMessage())
                     .build().toEntity(httpStatus);
         } catch (Exception e) {
             log.error("Failed to add running name", e);

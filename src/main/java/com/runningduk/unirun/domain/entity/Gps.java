@@ -17,9 +17,6 @@ public class Gps {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int gpsId;
 
-    @Column(name="user_id")
-    private String userId;
-
     private Timestamp time;
 
     private double latitude;

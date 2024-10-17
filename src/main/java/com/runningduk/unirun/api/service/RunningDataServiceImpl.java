@@ -9,6 +9,7 @@ import com.runningduk.unirun.domain.repository.UserRepository;
 import com.runningduk.unirun.exceptions.NoSuchRunningDataException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.sql.Time;
@@ -21,6 +22,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RunningDataServiceImpl implements RunningDataService {
 
     private final RunningDataRepository runningDataRepository;
@@ -29,8 +31,8 @@ public class RunningDataServiceImpl implements RunningDataService {
 
     private final UserRepository userRepository;
 
-    @Transactional
     public int saveRunningData(RunningData runningData) {
+        log.info("Save running_data : {}", runningData);
         RunningData newRunningData = runningDataRepository.save(runningData);
         return newRunningData.getRunningDataId();
     }
@@ -40,7 +42,7 @@ public class RunningDataServiceImpl implements RunningDataService {
         if (result.isPresent()) {
             return result.get();
         } else {
-            throw new NoSuchRunningDataException("No such running_data");
+            throw new NoSuchRunningDataException(runningDataId);
         }
     }
 
@@ -115,7 +117,7 @@ public class RunningDataServiceImpl implements RunningDataService {
         if (result.isPresent()) {
             runningDataRepository.deleteById(runningDataId);
         } else {
-            throw new NoSuchRunningDataException("Running data not found for id " + runningDataId);
+            throw new NoSuchRunningDataException(runningDataId);
         }
     }
 }

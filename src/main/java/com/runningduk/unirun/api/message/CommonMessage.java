@@ -7,10 +7,9 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class SummeryMessage {
-    private double distance;
-    private double cal;
-    private int runningDataId;
+@AllArgsConstructor
+public class CommonMessage<T> {     // 프론트에 보낼 메시지 포맷
+    private String type;
+    private T payload;
 }
