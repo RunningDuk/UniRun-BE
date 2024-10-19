@@ -51,6 +51,8 @@ public class UserController {
             }
 
             log.info("Login successful for user ID: {}", userInfo.getUserId());  // 로그인 성공 로그
+            log.info("/user/auth 의 Session id: {}", session.getId());
+
             return CommonApiResponse.builder()
                     .status(httpStatus.value())
                     .message("SUCCESS")
@@ -140,9 +142,9 @@ public class UserController {
         }
     }
 
-    @RequestMapping(value = "/user/logout", method = RequestMethod.POST)
-    public ResponseEntity<CommonApiResponse> logout(HttpServletRequest request) {
-        HttpSession session = request.getSession();
+    @RequestMapping(value = "/user/logout", method = RequestMethod.DELETE)
+    public ResponseEntity<CommonApiResponse> logout(HttpSession session) {
+        log.info("/user/logout 의 Session id: {}", session.getId());    // 세션 ID
         log.info("Logging out user ID: {}", session.getAttribute("userId"));  // 로그아웃 로그
         try {
             String refreshToken = (String) session.getAttribute("refreshToken");
