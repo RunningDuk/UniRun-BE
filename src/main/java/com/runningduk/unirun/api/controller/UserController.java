@@ -6,10 +6,12 @@ import com.runningduk.unirun.api.response.SaveResultModel;
 import com.runningduk.unirun.domain.model.KakaoLogoutModel;
 import com.runningduk.unirun.domain.model.UserModel;
 import com.runningduk.unirun.api.service.UserService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -143,7 +145,15 @@ public class UserController {
     }
 
     @RequestMapping(value = "/user/logout", method = RequestMethod.DELETE)
-    public ResponseEntity<CommonApiResponse> logout(HttpSession session) {
+    public ResponseEntity<CommonApiResponse> logout(HttpSession session, HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                log.info("Cookie Name: " + cookie.getName());
+                log.info("Cookie Value: " + cookie.getValue());
+            }
+        }
+
         log.info("/user/logout 의 Session id: {}", session.getId());    // 세션 ID
         log.info("Logging out user ID: {}", session.getAttribute("userId"));  // 로그아웃 로그
         try {
