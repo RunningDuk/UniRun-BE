@@ -181,7 +181,10 @@ public class GpsController extends TextWebSocketHandler {
 
         // WebSocket Session에서 distance 값 가져오기
         Map<String, Double> locationData = (Map<String, Double>) socketSession.getAttributes().get("locationData");
-        double distance = locationData.get("distance");
+        double distance = 0;
+        if (locationData.get("distance") != null) {
+            distance = locationData.get("distance");
+        }
 
         RunningData runningData = RunningData.builder()
                 .runningDataId(runningDataId)
@@ -216,7 +219,9 @@ public class GpsController extends TextWebSocketHandler {
 
         // session 업데이트
         Map<String, Double> locationData = (Map<String, Double>) socketSession.getAttributes().get("locationData");
-        locationData = gpsService.updateLocationData(locationData, runningLocationReq.getLatitude(), runningLocationReq.getLongitude());
+        if (locationData != null) {
+            locationData = gpsService.updateLocationData(locationData, runningLocationReq.getLatitude(), runningLocationReq.getLongitude());
+        }
         socketSession.getAttributes().put("locationData", locationData);
 
         logger.info("Location data processed: latitude = {}, longitude = {}, sessionId = {}", runningLocationReq.getLatitude(), runningLocationReq.getLongitude(), socketSession.getId());
