@@ -199,8 +199,6 @@ public class GpsController extends TextWebSocketHandler {
 
         // FE에 Date, Time, Distance, Cal 정보 넘기기
         requestWSEnd(socketSession, runningData);
-
-        logger.info("Running session finished and closed for session: {}", socketSession.getId());
     }
 
     // Gps 데이터 저장 및 거리 갱신
@@ -266,6 +264,6 @@ public class GpsController extends TextWebSocketHandler {
         String responsePayload = objectMapper.writeValueAsString(commonMessage);
         socketSession.sendMessage(new TextMessage(responsePayload));
 
-        logger.info("Responded with running summary for session {}", socketSession.getId());
+        logger.info("Request Web Socket End {}", socketSession.getId());
     }
 }
