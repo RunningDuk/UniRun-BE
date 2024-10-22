@@ -1,6 +1,7 @@
 package com.runningduk.unirun.api.controller;
 
 import com.runningduk.unirun.api.response.CommonApiResponse;
+import com.runningduk.unirun.api.response.RunningDataGetRes;
 import com.runningduk.unirun.api.service.GPSService;
 import com.runningduk.unirun.api.service.RunningDataService;
 import com.runningduk.unirun.domain.entity.RunningData;
@@ -13,6 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -70,11 +74,22 @@ public class MyRunningController {
                 runningDataService.saveRunningData(runningData);
             }
 
+            Date runningDate = runningData.getRunningDate();
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd E");
+            String formattedDate = formatter.format(runningDate);
+
+            RunningDataGetRes data = RunningDataGetRes.builder()
+                            .runningDate(formattedDate)
+                                    .totalTime(runningData.getTotalTime())
+                                            .totalKm(Math.round(runningData.getTotalKm() * 100.0) / 100.0)
+                                                    .cal(Math.round(runningData.getCal() * 100.0) / 100.0)
+                                                            .build();
+
             log.info("Success to get running data for id {} : {}", runningData.getRunningDataId(), runningData);
 
             return CommonApiResponse.builder()
                     .status(httpStatus.value())
-                    .data(runningData)
+                    .data(data)
                     .message("SUCCESS")
                     .build().toEntity(httpStatus);
         } catch (NoSuchRunningDataException e) {
