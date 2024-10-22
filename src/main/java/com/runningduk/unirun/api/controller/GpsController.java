@@ -254,7 +254,7 @@ public class GpsController extends TextWebSocketHandler {
         int runningDataId = (int) socketSession.getAttributes().get("runningDataId");
 
         Map data = new HashMap();
-        data.put("runnginDataId", runningDataId);
+        data.put("runningDataId", runningDataId);
 
         CommonMessage commonMessage = CommonMessage.builder()
                 .type("END")
