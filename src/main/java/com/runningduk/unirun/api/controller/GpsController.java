@@ -169,7 +169,14 @@ public class GpsController extends TextWebSocketHandler {
     private void processPause(WebSocketSession socketSession) throws IOException {
         logger.info("Pausing running session for session: {}", socketSession.getId());
         gpsScheduler.stopScheduler();
-        socketSession.sendMessage(new TextMessage("REQUEST_GPS_DATA"));
+
+        CommonMessage commonMessage = CommonMessage.builder()
+                        .type("REQUEST_GPS")
+                                .payload(null)
+                                        .build();
+
+        String responsePayload = objectMapper.writeValueAsString(commonMessage);
+        socketSession.sendMessage(new TextMessage(responsePayload));
     }
 
     // 러닝 종료 상태 프로세스
