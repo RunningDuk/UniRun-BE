@@ -117,7 +117,7 @@ public class MyRunningController {
 
             RunningData runningData = runningDataService.getRunningDataById(runningDataId);
 
-            if (runningData.getUserId().equals(userId)) {
+            if (!runningData.getUserId().equals(userId)) {
                 return CommonApiResponse.builder()
                         .status(HttpStatus.UNAUTHORIZED.value())
                         .data(null)
