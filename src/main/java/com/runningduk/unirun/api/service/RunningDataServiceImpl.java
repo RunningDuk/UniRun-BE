@@ -74,7 +74,10 @@ public class RunningDataServiceImpl implements RunningDataService {
         // 시간 단위로 변환
         double totalHours = totalSeconds / 3600.0;
 
-        double kmPerHour = distance / totalHours;
+        double kmPerHour = 0;
+        if (totalHours != 0) {
+            kmPerHour = distance / totalHours;
+        }
 
         double met = selectMET(kmPerHour);
 
@@ -95,7 +98,9 @@ public class RunningDataServiceImpl implements RunningDataService {
     }
 
     public double selectMET(double speed) {
-        if (speed < 3.2) {
+        if (speed == 0) {
+            return 0.0; // speed가 0일 때
+        } else if (speed < 3.2) {
             return 2.0; // 걷기 (느린 속도)
         } else if (speed < 5.6) {
             return 3.8; // 걷기 (보통 속도)
